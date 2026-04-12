@@ -1,0 +1,494 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subconsultas en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/subconsultas_sql_server.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 03 · SQL Server</div>
+  <h1>Subconsultas en<br><span>SQL Server</span></h1>
+  <p class="subtitle">Dominá uno de los conceptos más poderosos del lenguaje SQL: consultas anidadas, correlacionadas y operadores avanzados.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('donde',1)">📍 ¿Dónde van?</button>
+  <button class="nav-btn" onclick="showTab('tipos',2)">⚙️ Tipos</button>
+  <button class="nav-btn" onclick="showTab('operadores',3)">🔑 Operadores</button>
+  <button class="nav-btn" onclick="showTab('performance',4)">🚀 Performance</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     TAB 1: INTRODUCCIÓN
+══════════════════════════════════════════ -->
+<div class="section active" id="tab-intro">
+  <h2>¿Qué es una subconsulta?</h2>
+  <p class="section-intro">Una subconsulta es una sentencia <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">SELECT</code> que se anida dentro de otra consulta. La consulta exterior utiliza el resultado de la interior para realizar su operación.</p>
+
+  <div class="concepto">
+    Pensala así: una subconsulta es una <strong>pregunta dentro de otra pregunta</strong>.<br>
+    Primero SQL resuelve la interior, obtiene un resultado, y luego la exterior usa ese resultado para filtrar, comparar o calcular.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('donde',1)">
+      <div class="card-icon">[ ]</div>
+      <h3>¿Dónde van?</h3>
+      <p>En SELECT, WHERE o FROM. Cada ubicación tiene un propósito distinto.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('tipos',2)">
+      <div class="card-icon">{ }</div>
+      <h3>Tipos</h3>
+      <p>Escalares, de lista, correlacionadas. La diferencia está en cómo interactúan con la consulta exterior.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--operator)" onclick="showTab('operadores',3)">
+      <div class="card-icon">=&gt;</div>
+      <h3>Operadores</h3>
+      <p>IN, EXISTS, ANY, ALL, NOT IN. Cada uno tiene semántica y performance diferente.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('performance',4)">
+      <div class="card-icon">⚡</div>
+      <h3>Performance</h3>
+      <p>Cuándo conviene una subconsulta vs un JOIN. El plan de ejecución no miente.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Estructura básica</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">estructura_basica.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> columna1, columna2
+<span class="kw">FROM</span>   <span class="tbl">Tabla</span>
+<span class="kw">WHERE</span>  columna1 <span class="op">=</span> (
+           <span class="cm">-- ↑ consulta exterior</span>
+<span class="sub">           <span class="kw">SELECT</span> <span class="fn">MAX</span>(alguna_columna)
+           <span class="kw">FROM</span>   <span class="tbl">OtraTabla</span>
+           <span class="cm">-- ↑ subconsulta (consulta interior)</span></span>
+       );</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>Reglas fundamentales</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>Siempre va entre <strong>paréntesis</strong>.</div></li>
+      <li><div class="step-num">2</div><div>Debe devolver un tipo de dato compatible con el contexto donde se usa.</div></li>
+      <li><div class="step-num">3</div><div>No puede contener <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">ORDER BY</code> salvo que use <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">TOP</code>.</div></li>
+      <li><div class="step-num">4</div><div>Las subconsultas en <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">FROM</code> necesitan obligatoriamente un <strong>alias</strong>.</div></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2: DÓNDE VAN
+══════════════════════════════════════════ -->
+<div class="section" id="tab-donde">
+  <h2>¿Dónde se puede poner una subconsulta?</h2>
+  <p class="section-intro">Hay tres cláusulas que admiten subconsultas, y cada una tiene un comportamiento distinto.</p>
+
+  <h3>① En la cláusula WHERE — la más común</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Se usa para filtrar filas en función de un resultado calculado. Es el caso más frecuente.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">where_ejemplo.sql — empleados que ganan más que el promedio</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> Nombre, Sueldo
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+<span class="kw">WHERE</span>  Sueldo <span class="op">&gt;</span> (
+<span class="sub">           <span class="kw">SELECT</span> <span class="fn">AVG</span>(Sueldo)
+           <span class="kw">FROM</span>   <span class="tbl">Empleados</span></span>
+       );</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>¿Qué hace SQL?</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>Ejecuta la subconsulta: calcula el <strong>promedio de todos los sueldos</strong>, por ejemplo: 75.000.</div></li>
+      <li><div class="step-num">2</div><div>Reemplaza la subconsulta por ese número: <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">WHERE Sueldo > 75000</code>.</div></li>
+      <li><div class="step-num">3</div><div>Filtra y devuelve solo los empleados que cumplen la condición.</div></li>
+    </ul>
+  </div>
+
+  <hr>
+  <h3>② En la cláusula SELECT — columna calculada</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Devuelve un valor adicional por cada fila. <strong>Debe ser escalar</strong> (un solo valor).</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">select_ejemplo.sql — cuántos empleados tiene cada departamento</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    d.Nombre,
+    (
+<span class="sub">        <span class="kw">SELECT</span> <span class="fn">COUNT</span>(<span class="op">*</span>)
+        <span class="kw">FROM</span>   <span class="tbl">Empleados</span> e
+        <span class="kw">WHERE</span>  e.IdDepartamento <span class="op">=</span> d.IdDepartamento</span>
+    ) <span class="kw">AS</span> CantEmpleados
+<span class="kw">FROM</span> <span class="tbl">Departamentos</span> d;</pre>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <div>Esta subconsulta hace referencia a <code style="font-family:'JetBrains Mono',monospace">d.IdDepartamento</code> de la consulta exterior. Por eso es una <strong>subconsulta correlacionada</strong>: se ejecuta una vez por cada fila del resultado.</div>
+  </div>
+
+  <hr>
+  <h3>③ En la cláusula FROM — tabla derivada</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">La subconsulta actúa como una tabla temporal sobre la que podés seguir filtrando o agrupando. <strong>Obligatorio usar alias.</strong></p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">from_ejemplo.sql — departamentos con sueldo promedio mayor a $80.000</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> dep, promedio
+<span class="kw">FROM</span> (
+<span class="sub">    <span class="kw">SELECT</span>
+        IdDepartamento <span class="kw">AS</span> dep,
+        <span class="fn">AVG</span>(Sueldo)    <span class="kw">AS</span> promedio
+    <span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+    <span class="kw">GROUP BY</span> IdDepartamento</span>
+) <span class="kw">AS</span> ResumenSueldos        <span class="cm">-- alias obligatorio</span>
+<span class="kw">WHERE</span> promedio <span class="op">&gt;</span> <span class="nm">80000</span>;</pre>
+  </div>
+
+  <div class="tip success">
+    <span class="tip-icon">💡</span>
+    <div>¿Por qué no usar directamente <code style="font-family:'JetBrains Mono',monospace">HAVING AVG(Sueldo) > 80000</code>? Funciona igual en este caso, pero la tabla derivada te permite reutilizar el valor calculado en múltiples condiciones sin repetir la función.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3: TIPOS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-tipos">
+  <h2>Tipos de subconsultas</h2>
+  <p class="section-intro">La clasificación más importante no es dónde van, sino <strong>cómo se relacionan con la consulta exterior</strong>.</p>
+
+  <h3>① Escalar — devuelve exactamente 1 valor</h3>
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">escalar.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- ¿Quién tiene el sueldo más alto?</span>
+<span class="kw">SELECT</span> Nombre, Sueldo
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+<span class="kw">WHERE</span>  Sueldo <span class="op">=</span> (
+<span class="sub">           <span class="kw">SELECT</span> <span class="fn">MAX</span>(Sueldo) <span class="kw">FROM</span> <span class="tbl">Empleados</span></span>
+       );</pre>
+  </div>
+  <div class="concepto">
+    Si la subconsulta escalar devuelve <strong>más de una fila</strong>, SQL Server lanza un error.<br>
+    Si devuelve <strong>NULL</strong>, la comparación con <code style="font-family:'JetBrains Mono',monospace">=</code> falla silenciosamente (devuelve UNKNOWN, no TRUE ni FALSE).
+  </div>
+
+  <hr>
+  <h3>② De lista — devuelve múltiples valores (una columna)</h3>
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">lista.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- Empleados de departamentos de tecnología</span>
+<span class="kw">SELECT</span> Nombre
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+<span class="kw">WHERE</span>  IdDepartamento <span class="kw">IN</span> (
+<span class="sub">           <span class="kw">SELECT</span> IdDepartamento
+           <span class="kw">FROM</span>   <span class="tbl">Departamentos</span>
+           <span class="kw">WHERE</span>  Nombre <span class="kw">IN</span> (<span class="st">'Sistemas'</span>, <span class="st">'Infraestructura'</span>)</span>
+       );</pre>
+  </div>
+
+  <hr>
+  <h3>③ Correlacionada — referencia a la consulta exterior</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Es la más poderosa y la más costosa. Se ejecuta <strong>una vez por cada fila</strong> de la consulta exterior.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">correlacionada.sql — empleados que ganan más que el promedio de SU departamento</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> e.Nombre, e.Sueldo, e.IdDepartamento
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span> e           <span class="cm">-- alias "e" de la consulta exterior</span>
+<span class="kw">WHERE</span>  e.Sueldo <span class="op">&gt;</span> (
+<span class="sub">           <span class="kw">SELECT</span> <span class="fn">AVG</span>(e2.Sueldo)
+           <span class="kw">FROM</span>   <span class="tbl">Empleados</span> e2
+           <span class="kw">WHERE</span>  e2.IdDepartamento <span class="op">=</span> e.IdDepartamento
+           <span class="cm">--                          ↑ referencia a la exterior</span></span>
+       );</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>¿Por qué es "correlacionada"?</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>La consulta exterior toma la primera fila de <strong>Empleados</strong> (ej: María, Departamento 3).</div></li>
+      <li><div class="step-num">2</div><div>Ejecuta la subconsulta: calcula el <strong>AVG del Departamento 3</strong>.</div></li>
+      <li><div class="step-num">3</div><div>Compara el sueldo de María con ese promedio. Si aplica, la incluye.</div></li>
+      <li><div class="step-num">4</div><div>Repite para cada fila. Con 10.000 empleados → 10.000 ejecuciones de la subconsulta.</div></li>
+    </ul>
+  </div>
+
+  <div class="tip danger">
+    <span class="tip-icon">🔴</span>
+    <div>Con tablas grandes, las subconsultas correlacionadas pueden ser muy lentas. A menudo se pueden reescribir como un <strong>JOIN con GROUP BY</strong> para mejor performance. Ver pestaña <strong>Performance</strong>.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4: OPERADORES
+══════════════════════════════════════════ -->
+<div class="section" id="tab-operadores">
+  <h2>Operadores con subconsultas</h2>
+  <p class="section-intro">El operador que uses entre la consulta exterior y la subconsulta define la semántica completa de la comparación.</p>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Operador</th>
+        <th>Significado</th>
+        <th>Performance</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>IN</td>
+        <td>¿está en la lista?</td>
+        <td><span class="perf-badge perf-media">Media</span></td>
+        <td>Verdadero si el valor coincide con algún elemento devuelto por la subconsulta. Cuidado con NULLs.</td>
+      </tr>
+      <tr>
+        <td>NOT IN</td>
+        <td>¿no está en la lista?</td>
+        <td><span class="perf-badge perf-baja">Baja</span></td>
+        <td>Si la subconsulta devuelve algún NULL, NOT IN no retornará ninguna fila. ⚠️ Error clásico.</td>
+      </tr>
+      <tr>
+        <td>EXISTS</td>
+        <td>¿existe alguna fila?</td>
+        <td><span class="perf-badge perf-alta">Alta</span></td>
+        <td>Corta en cuanto encuentra la primera coincidencia. Más eficiente que IN para subconsultas grandes.</td>
+      </tr>
+      <tr>
+        <td>NOT EXISTS</td>
+        <td>¿no existe ninguna?</td>
+        <td><span class="perf-badge perf-alta">Alta</span></td>
+        <td>La alternativa segura a NOT IN. No tiene el problema con NULLs.</td>
+      </tr>
+      <tr>
+        <td>= / &lt; / &gt;</td>
+        <td>comparación escalar</td>
+        <td><span class="perf-badge perf-media">Media</span></td>
+        <td>La subconsulta debe devolver exactamente 1 fila. Si devuelve más, SQL Server lanza error.</td>
+      </tr>
+      <tr>
+        <td>ANY / SOME</td>
+        <td>¿mayor/menor que alguno?</td>
+        <td><span class="perf-badge perf-media">Media</span></td>
+        <td>Verdadero si la condición se cumple para AL MENOS UN elemento de la lista.</td>
+      </tr>
+      <tr>
+        <td>ALL</td>
+        <td>¿mayor/menor que todos?</td>
+        <td><span class="perf-badge perf-media">Media</span></td>
+        <td>Verdadero si la condición se cumple para TODOS los elementos de la lista.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <h3>La trampa de NOT IN con NULLs</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">trampa_null.sql — este resultado puede sorprenderte</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- Si Departamentos tiene un IdDepartamento = NULL...</span>
+<span class="kw">SELECT</span> Nombre
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+<span class="kw">WHERE</span>  IdDepartamento <span class="kw">NOT IN</span> (
+<span class="sub">           <span class="kw">SELECT</span> IdDepartamento <span class="kw">FROM</span> <span class="tbl">Departamentos</span></span>
+       );
+<span class="cm">-- Resultado: 0 filas ← aunque haya empleados sin departamento</span>
+
+<span class="cm">-- La solución: usar NOT EXISTS</span>
+<span class="kw">SELECT</span> Nombre
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span> e
+<span class="kw">WHERE</span>  <span class="kw">NOT EXISTS</span> (
+<span class="sub">           <span class="kw">SELECT</span> <span class="nm">1</span>
+           <span class="kw">FROM</span>   <span class="tbl">Departamentos</span> d
+           <span class="kw">WHERE</span>  d.IdDepartamento <span class="op">=</span> e.IdDepartamento</span>
+       );
+<span class="cm">-- Resultado: correcto siempre</span></pre>
+  </div>
+
+  <div class="concepto">
+    <strong>¿Por qué pasa esto?</strong><br>
+    En SQL, <code style="font-family:'JetBrains Mono',monospace">NULL</code> no es igual ni distinto a nada. Cuando <code style="font-family:'JetBrains Mono',monospace">NOT IN</code> compara con una lista que contiene NULL, la expresión devuelve <strong>UNKNOWN</strong> en lugar de TRUE o FALSE, y ninguna fila pasa el filtro.
+  </div>
+
+  <hr>
+  <h3>EXISTS vs IN — cuándo usar cada uno</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">exists_vs_in.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- Con IN: SQL evalúa todos los valores de la lista primero</span>
+<span class="kw">SELECT</span> d.Nombre
+<span class="kw">FROM</span>   <span class="tbl">Departamentos</span> d
+<span class="kw">WHERE</span>  d.IdDepartamento <span class="kw">IN</span> (
+<span class="sub">           <span class="kw">SELECT</span> IdDepartamento <span class="kw">FROM</span> <span class="tbl">Empleados</span></span>
+       );
+
+<span class="cm">-- Con EXISTS: corta al primer match → más rápido en tablas grandes</span>
+<span class="kw">SELECT</span> d.Nombre
+<span class="kw">FROM</span>   <span class="tbl">Departamentos</span> d
+<span class="kw">WHERE</span>  <span class="kw">EXISTS</span> (
+<span class="sub">           <span class="kw">SELECT</span> <span class="nm">1</span>              <span class="cm">-- el 1 es convención, podría ser *</span>
+           <span class="kw">FROM</span>   <span class="tbl">Empleados</span> e
+           <span class="kw">WHERE</span>  e.IdDepartamento <span class="op">=</span> d.IdDepartamento</span>
+       );</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5: PERFORMANCE
+══════════════════════════════════════════ -->
+<div class="section" id="tab-performance">
+  <h2>Performance y alternativas</h2>
+  <p class="section-intro">Las subconsultas no siempre son la mejor opción. Conocer las alternativas te ayuda a elegir la herramienta correcta.</p>
+
+  <h3>Subconsulta correlacionada vs JOIN</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">El mismo resultado, distinta estrategia de ejecución:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card vs-sub">
+      <div class="compare-card-header">🐢 Subconsulta correlacionada</div>
+      <pre><span class="kw">SELECT</span> e.Nombre, e.Sueldo
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span> e
+<span class="kw">WHERE</span>  e.Sueldo <span class="op">&gt;</span> (
+<span class="sub">    <span class="kw">SELECT</span> <span class="fn">AVG</span>(e2.Sueldo)
+    <span class="kw">FROM</span>   <span class="tbl">Empleados</span> e2
+    <span class="kw">WHERE</span>  e2.IdDept
+            <span class="op">=</span> e.IdDept</span>
+);</pre>
+    </div>
+    <div class="compare-card vs-join">
+      <div class="compare-card-header">🚀 JOIN con GROUP BY (mejor)</div>
+      <pre><span class="kw">SELECT</span> e.Nombre, e.Sueldo
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span> e
+<span class="kw">JOIN</span>  (<span class="kw">SELECT</span> IdDept,
+              <span class="fn">AVG</span>(Sueldo) prom
+       <span class="kw">FROM</span>  <span class="tbl">Empleados</span>
+       <span class="kw">GROUP BY</span> IdDept) x
+  <span class="kw">ON</span>  x.IdDept <span class="op">=</span> e.IdDept
+<span class="kw">WHERE</span> e.Sueldo <span class="op">&gt;</span> x.prom;</pre>
+    </div>
+  </div>
+
+  <div class="explicacion">
+    <h4>¿Por qué el JOIN es más rápido?</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>El JOIN calcula los promedios por departamento <strong>una sola vez</strong>.</div></li>
+      <li><div class="step-num">2</div><div>La subconsulta correlacionada los calcula <strong>una vez por fila</strong> de Empleados.</div></li>
+      <li><div class="step-num">3</div><div>Con 50.000 empleados: 1 pasada vs 50.000 pasadas. La diferencia es enorme.</div></li>
+    </ul>
+  </div>
+
+  <hr>
+  <h3>Guía de decisión rápida</h3>
+
+  <table class="op-table">
+    <thead>
+      <tr><th>Situación</th><th>Herramienta recomendada</th><th>Por qué</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Una sola comparación escalar</td>
+        <td>Subconsulta escalar</td>
+        <td>Simple, legible, rápida.</td>
+      </tr>
+      <tr>
+        <td>¿Existe al menos una fila?</td>
+        <td>EXISTS</td>
+        <td>Corta al primer match, no lee toda la tabla.</td>
+      </tr>
+      <tr>
+        <td>Comparar contra una lista pequeña</td>
+        <td>IN</td>
+        <td>Legible y efectivo para listas chicas.</td>
+      </tr>
+      <tr>
+        <td>Comparar contra una lista grande</td>
+        <td>JOIN</td>
+        <td>El optimizador maneja mejor los JOINs.</td>
+      </tr>
+      <tr>
+        <td>Excluir filas (NOT IN)</td>
+        <td>NOT EXISTS</td>
+        <td>Evita la trampa de NULLs de NOT IN.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <div>Siempre verificá el <strong>plan de ejecución</strong> con <code style="font-family:'JetBrains Mono',monospace">CTRL+M</code> en SSMS. A veces el optimizador convierte automáticamente una subconsulta en un JOIN. Pero no siempre lo hace.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6: QUIZ
+══════════════════════════════════════════ -->
+<div class="section" id="tab-quiz">
+  <h2>Quiz — Ponete a prueba</h2>
+  <p class="section-intro">5 preguntas para verificar que entendiste los conceptos clave.</p>
+
+  <div id="quiz-container"></div>
+  <div id="quiz-score" class="quiz-score" style="display:none">
+    <div class="score-num" id="score-val"></div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Volver a intentar</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Subconsultas en SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/subconsultas_sql_server.js"></script>
+</body>
+</html>

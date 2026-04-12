@@ -1,0 +1,692 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funciones Nativas — SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/funciones_nativas_sql_server.css">
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 01 · SQL Server</div>
+  <h1>Funciones <span>Nativas</span><br>de SQL Server</h1>
+  <p class="subtitle">Herramientas del lenguaje para manipular cadenas de texto, trabajar con fechas, convertir tipos de datos y operar con números, directamente dentro de tus consultas.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('cadenas',1)">🔤 Cadenas</button>
+  <button class="nav-btn" onclick="showTab('fechas',2)">📅 Fechas</button>
+  <button class="nav-btn" onclick="showTab('conversion',3)">🔄 Conversión</button>
+  <button class="nav-btn" onclick="showTab('numeros',4)">🔢 Números</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — INTRO
+══════════════════════════════════════════ -->
+<div class="section active" id="tab-intro">
+  <h2>¿Qué son las funciones nativas?</h2>
+  <p class="section-intro">SQL Server incluye cientos de funciones predefinidas que podés usar directamente en tus consultas sin escribir lógica adicional. Están agrupadas por el tipo de dato con el que operan.</p>
+
+  <div class="concepto">
+    Una función nativa recibe uno o más <strong>argumentos</strong>, realiza una operación, y devuelve un <strong>valor resultado</strong>. Se pueden usar en cualquier lugar donde pondría una expresión: en <code>SELECT</code>, <code>WHERE</code>, <code>ORDER BY</code>, <code>CASE</code>, e incluso dentro de otras funciones.
+  </div>
+
+  <div class="fn-grid">
+    <div class="fn-card" onclick="showTab('cadenas',1)" style="cursor:pointer">
+      <div class="fn-card-header">
+        <span class="fn-name" style="color:var(--purple)">Cadenas</span>
+        <span class="fn-type-badge badge-cadena">TEXT</span>
+      </div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Manipulación de texto: recortar, reemplazar, cambiar mayúsculas, buscar subcadenas, concatenar.</div>
+        <div class="fn-example"><span class="ret-val">SUBSTRING · LEN · UPPER · LOWER<br>TRIM · REPLACE · CHARINDEX · CONCAT</span></div>
+      </div>
+    </div>
+    <div class="fn-card" onclick="showTab('fechas',2)" style="cursor:pointer">
+      <div class="fn-card-header">
+        <span class="fn-name" style="color:var(--blue)">Fechas</span>
+        <span class="fn-type-badge badge-fecha">DATE</span>
+      </div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Obtener la fecha actual, extraer partes, calcular diferencias, formatear y desplazar fechas.</div>
+        <div class="fn-example"><span class="ret-val">GETDATE · YEAR · MONTH · DAY<br>DATEDIFF · DATEADD · FORMAT · EOMONTH</span></div>
+      </div>
+    </div>
+    <div class="fn-card" onclick="showTab('conversion',3)" style="cursor:pointer">
+      <div class="fn-card-header">
+        <span class="fn-name" style="color:var(--amber)">Conversión</span>
+        <span class="fn-type-badge badge-conv">CAST</span>
+      </div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Cambiar el tipo de dato de un valor: número a texto, texto a fecha, entero a decimal y más.</div>
+        <div class="fn-example"><span class="ret-val">CAST · CONVERT · TRY_CAST · TRY_CONVERT<br>ISNULL · COALESCE</span></div>
+      </div>
+    </div>
+    <div class="fn-card" onclick="showTab('numeros',4)" style="cursor:pointer">
+      <div class="fn-card-header">
+        <span class="fn-name" style="color:var(--accent)">Números</span>
+        <span class="fn-type-badge badge-numero">NUM</span>
+      </div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Redondear, truncar, obtener valor absoluto, potencias, raíces y generación de números aleatorios.</div>
+        <div class="fn-example"><span class="ret-val">ROUND · FLOOR · CEILING · ABS<br>POWER · SQRT · RAND</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Cómo se usan</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">ejemplo_general.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- En SELECT: transformar valores al mostrarlos</span>
+<span class="kw">SELECT</span>
+    <span class="fn">UPPER</span>(Apellido)                    <span class="kw">AS</span> ApellidoMayus,
+    <span class="fn">LEN</span>(Nombre)                        <span class="kw">AS</span> LargoNombre,
+    <span class="fn">YEAR</span>(<span class="fn">GETDATE</span>()) <span class="op">-</span> <span class="fn">YEAR</span>(FechaNac)    <span class="kw">AS</span> EdadAprox,
+    <span class="fn">ISNULL</span>(Telefono, <span class="st">'Sin teléfono'</span>)  <span class="kw">AS</span> Contacto
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;
+
+<span class="cm">-- En WHERE: filtrar usando el resultado de una función</span>
+<span class="kw">SELECT</span> Nombre, FechaNac
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>
+<span class="kw">WHERE</span>  <span class="fn">MONTH</span>(FechaNac) <span class="op">=</span> <span class="fn">MONTH</span>(<span class="fn">GETDATE</span>()); <span class="cm">-- nacidos este mes</span>
+
+<span class="cm">-- Funciones anidadas: resultado de una como argumento de otra</span>
+<span class="kw">SELECT</span> <span class="fn">UPPER</span>(<span class="fn">TRIM</span>(Nombre)) <span class="kw">AS</span> NombreLimpio
+<span class="kw">FROM</span>   <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="tip info">
+    <span class="tip-icon">💡</span>
+    <div>Las funciones <strong>no modifican los datos almacenados</strong>. Solo transforman los valores al momento de mostrarlos o compararlos. Para modificar datos en la tabla hay que usar <code>UPDATE</code>.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — CADENAS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-cadenas">
+  <h2>Funciones de cadenas</h2>
+  <p class="section-intro">Permiten manipular texto dentro de las consultas: cambiar mayúsculas, recortar, buscar, reemplazar, extraer partes y más.</p>
+
+  <!-- demo interactivo cadenas -->
+  <h3>① Demo interactivo — probá las funciones</h3>
+  <div class="demo-box">
+    <div class="demo-header">Ingresá un texto y mirá el resultado de cada función</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <label>Texto:</label>
+        <input type="text" id="str-input" value="  Hola SQL Server  " oninput="updateStrDemo()" style="flex:1;min-width:200px">
+        <label>Desde:</label>
+        <input type="text" id="str-start" value="6" oninput="updateStrDemo()" style="width:60px">
+        <label>Largo:</label>
+        <input type="text" id="str-len" value="3" oninput="updateStrDemo()" style="width:60px">
+      </div>
+      <div class="demo-result-grid" id="str-result"></div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>② Referencia de funciones</h3>
+
+  <div class="fn-grid">
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">UPPER / LOWER</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Convierte todos los caracteres a mayúsculas o minúsculas.</div>
+        <div class="fn-syntax">UPPER(expresion)<br>LOWER(expresion)</div>
+        <div class="fn-example">UPPER('hola') → <span class="ret-val">'HOLA'</span><br>LOWER('MUNDO') → <span class="ret-val">'mundo'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">LEN</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve la cantidad de caracteres de una cadena, sin contar los espacios finales.</div>
+        <div class="fn-syntax">LEN(expresion)</div>
+        <div class="fn-example">LEN('SQL') → <span class="ret-val">3</span><br>LEN('Hola  ') → <span class="ret-val">4</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">SUBSTRING</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Extrae una porción de texto, indicando posición de inicio y cantidad de caracteres. La posición empieza en 1.</div>
+        <div class="fn-syntax">SUBSTRING(cadena, inicio, largo)</div>
+        <div class="fn-example">SUBSTRING('SQL Server', 5, 6) → <span class="ret-val">'Server'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">TRIM / LTRIM / RTRIM</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Elimina espacios. TRIM elimina de ambos extremos, LTRIM del inicio, RTRIM del final.</div>
+        <div class="fn-syntax">TRIM(cadena)<br>LTRIM(cadena) / RTRIM(cadena)</div>
+        <div class="fn-example">TRIM('  hola  ') → <span class="ret-val">'hola'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">REPLACE</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Reemplaza todas las ocurrencias de una subcadena por otra.</div>
+        <div class="fn-syntax">REPLACE(cadena, buscar, reemplazo)</div>
+        <div class="fn-example">REPLACE('a-b-c', '-', '/') → <span class="ret-val">'a/b/c'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">CHARINDEX</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve la posición de la primera aparición de una subcadena. Retorna 0 si no la encuentra.</div>
+        <div class="fn-syntax">CHARINDEX(buscar, cadena)</div>
+        <div class="fn-example">CHARINDEX('@','user@mail.com') → <span class="ret-val">5</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">CONCAT</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Une dos o más cadenas. Ignora NULLs automáticamente (a diferencia del operador +).</div>
+        <div class="fn-syntax">CONCAT(val1, val2, ...)</div>
+        <div class="fn-example">CONCAT('Juan', ' ', 'Pérez') → <span class="ret-val">'Juan Pérez'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">LEFT / RIGHT</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Extrae N caracteres desde la izquierda o la derecha de la cadena.</div>
+        <div class="fn-syntax">LEFT(cadena, n)<br>RIGHT(cadena, n)</div>
+        <div class="fn-example">LEFT('SQL Server', 3) → <span class="ret-val">'SQL'</span><br>RIGHT('SQL Server', 6) → <span class="ret-val">'Server'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">REPLICATE</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Repite una cadena N veces. Útil para formatear o rellenar.</div>
+        <div class="fn-syntax">REPLICATE(cadena, n)</div>
+        <div class="fn-example">REPLICATE('AB', 3) → <span class="ret-val">'ABABAB'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">REVERSE</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Invierte el orden de los caracteres de una cadena.</div>
+        <div class="fn-syntax">REVERSE(cadena)</div>
+        <div class="fn-example">REVERSE('SQL') → <span class="ret-val">'LQS'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">STR</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Convierte un número a cadena de texto con longitud y decimales definidos.</div>
+        <div class="fn-syntax">STR(numero, largo, decimales)</div>
+        <div class="fn-example">STR(3.1415, 6, 2) → <span class="ret-val">'  3.14'</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">STUFF</span><span class="fn-type-badge badge-cadena">Cadena</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Elimina un segmento de texto e inserta otro en su lugar.</div>
+        <div class="fn-syntax">STUFF(cadena, inicio, largo, nuevo)</div>
+        <div class="fn-example">STUFF('ABCDE', 2, 2, 'XY') → <span class="ret-val">'AXYDE'</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>③ Caso práctico — construir nombre completo y extraer dominio de email</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">cadenas_practico.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    <span class="cm">-- Nombre completo con formato "APELLIDO, Nombre"</span>
+    <span class="fn">CONCAT</span>(<span class="fn">UPPER</span>(Apellido), <span class="st">', '</span>, <span class="fn">UPPER</span>(<span class="fn">LEFT</span>(Nombre,<span class="nm">1</span>)), <span class="fn">LOWER</span>(<span class="fn">SUBSTRING</span>(Nombre,<span class="nm">2</span>,<span class="nm">100</span>)))
+        <span class="kw">AS</span> NombreFormato,
+
+    <span class="cm">-- Largo del apellido</span>
+    <span class="fn">LEN</span>(Apellido) <span class="kw">AS</span> LargoApellido,
+
+    <span class="cm">-- Email sin espacios y en minúsculas</span>
+    <span class="fn">LOWER</span>(<span class="fn">TRIM</span>(Email)) <span class="kw">AS</span> EmailLimpio,
+
+    <span class="cm">-- Dominio del email (todo lo que va después del @)</span>
+    <span class="fn">SUBSTRING</span>(
+        Email,
+        <span class="fn">CHARINDEX</span>(<span class="st">'@'</span>, Email) <span class="op">+</span> <span class="nm">1</span>,
+        <span class="fn">LEN</span>(Email)
+    ) <span class="kw">AS</span> Dominio,
+
+    <span class="cm">-- Reemplazar guiones del teléfono</span>
+    <span class="fn">REPLACE</span>(Telefono, <span class="st">'-'</span>, <span class="st">''</span>) <span class="kw">AS</span> TelefonoNumerico
+
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="tip warn">
+    <span class="tip-icon">⚠️</span>
+    <div>La concatenación con el operador <code>+</code> devuelve <code>NULL</code> si cualquiera de los valores es NULL. Usá siempre <code>CONCAT()</code> que ignora los NULLs, o combiná con <code>ISNULL()</code> para protegerte.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — FECHAS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-fechas">
+  <h2>Funciones de fechas</h2>
+  <p class="section-intro">Las fechas son uno de los tipos de datos más usados y más complejos. SQL Server tiene funciones para obtener la fecha actual, extraer partes, calcular diferencias y formatear la salida.</p>
+
+  <!-- demo interactivo fechas -->
+  <h3>① Demo interactivo — explorá una fecha</h3>
+  <div class="demo-box">
+    <div class="demo-header">Ingresá una fecha de nacimiento y calculamos todo</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <label>Fecha de nacimiento:</label>
+        <input type="date" id="fecha-input" value="1990-06-15" oninput="updateFechaDemo()">
+      </div>
+      <div class="demo-result-grid" id="fecha-result"></div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>② Fecha y hora actual</h3>
+
+  <table class="op-table">
+    <thead><tr><th>Función</th><th>Descripción</th><th>Ejemplo de resultado</th></tr></thead>
+    <tbody>
+      <tr><td>GETDATE()</td><td>Fecha y hora actual del servidor (sin zona horaria)</td><td>2025-06-15 14:32:00.000</td></tr>
+      <tr><td>SYSDATETIME()</td><td>Fecha y hora con más precisión (nanosegundos)</td><td>2025-06-15 14:32:00.1234567</td></tr>
+      <tr><td>GETUTCDATE()</td><td>Fecha y hora en UTC (tiempo universal)</td><td>2025-06-15 17:32:00.000</td></tr>
+      <tr><td>CURRENT_TIMESTAMP</td><td>Equivalente a GETDATE() — sintaxis estándar SQL</td><td>2025-06-15 14:32:00.000</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <h3>③ Extraer partes de una fecha</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">partes_fecha.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    FechaNac,
+    <span class="fn">YEAR</span>(FechaNac)        <span class="kw">AS</span> Anio,       <span class="cm">-- 1990</span>
+    <span class="fn">MONTH</span>(FechaNac)       <span class="kw">AS</span> Mes,        <span class="cm">-- 6</span>
+    <span class="fn">DAY</span>(FechaNac)         <span class="kw">AS</span> Dia,        <span class="cm">-- 15</span>
+    <span class="fn">DATEPART</span>(week,   FechaNac) <span class="kw">AS</span> Semana,   <span class="cm">-- número de semana del año</span>
+    <span class="fn">DATEPART</span>(weekday,FechaNac) <span class="kw">AS</span> DiaSemana, <span class="cm">-- 1=Dom ... 7=Sáb</span>
+    <span class="fn">DATENAME</span>(month,  FechaNac) <span class="kw">AS</span> NombreMes  <span class="cm">-- 'June' (según idioma)</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="tip info">
+    <span class="tip-icon">💡</span>
+    <div><code>DATEPART</code> devuelve un número entero. <code>DATENAME</code> devuelve el nombre como texto (en el idioma configurado en el servidor). Para fechas en español usá <code>FORMAT()</code>, que se ve en el punto siguiente.</div>
+  </div>
+
+  <hr>
+  <h3>④ DATEDIFF — diferencia entre fechas</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">datediff.sql — calcular edades y antigüedad</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Nombre,
+    FechaNac,
+    FechaIngreso,
+
+    <span class="cm">-- Edad en años (resta el año si todavía no llegó el cumpleaños)</span>
+    <span class="hl">    <span class="fn">DATEDIFF</span>(year, FechaNac, <span class="fn">GETDATE</span>())
+    <span class="op">-</span> <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">MONTH</span>(FechaNac) <span class="op">&gt;</span> <span class="fn">MONTH</span>(<span class="fn">GETDATE</span>()) <span class="kw">THEN</span> <span class="nm">1</span>
+        <span class="kw">WHEN</span> <span class="fn">MONTH</span>(FechaNac) <span class="op">=</span> <span class="fn">MONTH</span>(<span class="fn">GETDATE</span>())
+          <span class="kw">AND</span> <span class="fn">DAY</span>(FechaNac) <span class="op">&gt;</span> <span class="fn">DAY</span>(<span class="fn">GETDATE</span>()) <span class="kw">THEN</span> <span class="nm">1</span>
+        <span class="kw">ELSE</span> <span class="nm">0</span>
+      <span class="kw">END</span>                                      <span class="kw">AS</span> EdadExacta,</span>
+
+    <span class="fn">DATEDIFF</span>(month, FechaIngreso, <span class="fn">GETDATE</span>()) <span class="kw">AS</span> MesesEnEmpresa,
+    <span class="fn">DATEDIFF</span>(day,   FechaIngreso, <span class="fn">GETDATE</span>()) <span class="kw">AS</span> DiasEnEmpresa
+
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <hr>
+  <h3>⑤ DATEADD — sumar o restar a una fecha</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">dateadd.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    <span class="fn">GETDATE</span>()                              <span class="kw">AS</span> Hoy,
+    <span class="fn">DATEADD</span>(day,    <span class="nm">30</span>,  <span class="fn">GETDATE</span>())        <span class="kw">AS</span> En30Dias,
+    <span class="fn">DATEADD</span>(month, <span class="op">-</span><span class="nm">3</span>,  <span class="fn">GETDATE</span>())        <span class="kw">AS</span> Hace3Meses,
+    <span class="fn">DATEADD</span>(year,   <span class="nm">1</span>,  <span class="fn">GETDATE</span>())        <span class="kw">AS</span> AnioQueViene,
+    <span class="fn">EOMONTH</span>(<span class="fn">GETDATE</span>())                    <span class="kw">AS</span> FinDeEsteMes,
+    <span class="fn">EOMONTH</span>(<span class="fn">GETDATE</span>(), <span class="op">-</span><span class="nm">1</span>)               <span class="kw">AS</span> FinMesAnterior;
+
+<span class="cm">-- Partes válidas para DATEADD/DATEDIFF:</span>
+<span class="cm">-- year · quarter · month · week · day · hour · minute · second</span></pre>
+  </div>
+
+  <hr>
+  <h3>⑥ FORMAT — fechas con formato personalizado</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">format_fechas.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    <span class="fn">FORMAT</span>(<span class="fn">GETDATE</span>(), <span class="st">'dd/MM/yyyy'</span>)           <span class="kw">AS</span> FechaCorta,    <span class="cm">-- 15/06/2025</span>
+    <span class="fn">FORMAT</span>(<span class="fn">GETDATE</span>(), <span class="st">'dd/MM/yyyy HH:mm'</span>)     <span class="kw">AS</span> FechaHora,     <span class="cm">-- 15/06/2025 14:32</span>
+    <span class="fn">FORMAT</span>(<span class="fn">GETDATE</span>(), <span class="st">'dddd d \de MMMM \de yyyy'</span>, <span class="st">'es-AR'</span>)
+                                                <span class="kw">AS</span> FechaLarga,    <span class="cm">-- domingo 15 de junio de 2025</span>
+    <span class="fn">FORMAT</span>(<span class="fn">GETDATE</span>(), <span class="st">'MMMM yyyy'</span>, <span class="st">'es-AR'</span>)    <span class="kw">AS</span> MesAnio,       <span class="cm">-- junio 2025</span>
+    <span class="fn">FORMAT</span>(<span class="fn">GETDATE</span>(), <span class="st">'yyyyMMdd'</span>)             <span class="kw">AS</span> FechaISO;      <span class="cm">-- 20250615</span></pre>
+  </div>
+
+  <div class="tip warn">
+    <span class="tip-icon">⚠️</span>
+    <div><code>FORMAT()</code> es muy flexible pero más lenta que <code>CONVERT()</code> porque usa el motor de .NET internamente. Para reportes con millones de filas, preferí <code>CONVERT()</code>. Para cantidades normales, <code>FORMAT()</code> es la opción más legible.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4 — CONVERSIÓN
+══════════════════════════════════════════ -->
+<div class="section" id="tab-conversion">
+  <h2>Funciones de conversión de tipos</h2>
+  <p class="section-intro">SQL Server es un lenguaje fuertemente tipado: cada columna tiene un tipo de dato definido. A veces es necesario convertir un valor de un tipo a otro para poder operar, comparar o mostrar datos.</p>
+
+  <div class="concepto">
+    Hay dos tipos de conversión: <strong>implícita</strong> (SQL Server la hace automáticamente cuando los tipos son compatibles) y <strong>explícita</strong> (vos la indicás con <code>CAST</code> o <code>CONVERT</code>). La conversión explícita es siempre más segura y más clara.
+  </div>
+
+  <h3>① CAST vs CONVERT</h3>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">CAST — estándar SQL</div>
+      <pre><span class="cm">-- Sintaxis: CAST(valor AS tipo)</span>
+<span class="kw">SELECT</span>
+  <span class="fn">CAST</span>(<span class="nm">42</span> <span class="kw">AS</span> VARCHAR(<span class="nm">10</span>))   <span class="cm">-- '42'</span>
+  <span class="fn">CAST</span>(<span class="st">'3.14'</span> <span class="kw">AS</span> DECIMAL(<span class="nm">5</span>,<span class="nm">2</span>)) <span class="cm">-- 3.14</span>
+  <span class="fn">CAST</span>(<span class="fn">GETDATE</span>() <span class="kw">AS</span> DATE)    <span class="cm">-- solo fecha</span>
+  <span class="fn">CAST</span>(<span class="nm">1</span> <span class="kw">AS</span> BIT)              <span class="cm">-- 1 (true)</span></pre>
+    </div>
+    <div class="compare-card good">
+      <div class="compare-header">CONVERT — específico SQL Server</div>
+      <pre><span class="cm">-- Sintaxis: CONVERT(tipo, valor [, estilo])</span>
+<span class="kw">SELECT</span>
+  <span class="fn">CONVERT</span>(VARCHAR, <span class="nm">42</span>)         <span class="cm">-- '42'</span>
+  <span class="fn">CONVERT</span>(DATE, <span class="st">'2025-06-15'</span>)  <span class="cm">-- fecha</span>
+  <span class="cm">-- Con estilo de formato de fecha:</span>
+  <span class="fn">CONVERT</span>(VARCHAR, <span class="fn">GETDATE</span>(), <span class="nm">103</span>) <span class="cm">-- dd/mm/yyyy</span>
+  <span class="fn">CONVERT</span>(VARCHAR, <span class="fn">GETDATE</span>(), <span class="nm">112</span>) <span class="cm">-- yyyymmdd</span></pre>
+    </div>
+  </div>
+
+  <hr>
+  <h3>② Estilos de CONVERT para fechas</h3>
+
+  <table class="op-table">
+    <thead><tr><th>Estilo</th><th>Formato</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>CONVERT(..., 101)</td><td>mm/dd/yyyy (USA)</td><td>06/15/2025</td></tr>
+      <tr><td>CONVERT(..., 103)</td><td>dd/mm/yyyy (BR/AR)</td><td>15/06/2025</td></tr>
+      <tr><td>CONVERT(..., 104)</td><td>dd.mm.yyyy (DE)</td><td>15.06.2025</td></tr>
+      <tr><td>CONVERT(..., 108)</td><td>hh:mi:ss</td><td>14:32:00</td></tr>
+      <tr><td>CONVERT(..., 112)</td><td>yyyymmdd</td><td>20250615</td></tr>
+      <tr><td>CONVERT(..., 120)</td><td>yyyy-mm-dd hh:mi:ss</td><td>2025-06-15 14:32:00</td></tr>
+    </tbody>
+  </table>
+
+  <hr>
+  <h3>③ TRY_CAST / TRY_CONVERT — conversión segura</h3>
+
+  <div class="concepto">
+    Si intentás convertir un valor inválido con <code>CAST</code> o <code>CONVERT</code>, SQL Server lanza un <strong>error</strong> y la consulta falla. <code>TRY_CAST</code> y <code>TRY_CONVERT</code> devuelven <code>NULL</code> en lugar de fallar, lo que permite manejar datos sucios sin interrumpir la consulta.
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">try_cast.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- CAST falla si el valor no es convertible</span>
+<span class="kw">SELECT</span> <span class="fn">CAST</span>(<span class="st">'abc'</span> <span class="kw">AS</span> INT)      <span class="cm">-- ❌ Error: conversion failed</span>
+
+<span class="cm">-- TRY_CAST devuelve NULL en lugar de error</span>
+<span class="kw">SELECT</span> <span class="fn">TRY_CAST</span>(<span class="st">'abc'</span> <span class="kw">AS</span> INT)  <span class="cm">-- ✓ NULL</span>
+<span class="kw">SELECT</span> <span class="fn">TRY_CAST</span>(<span class="st">'42'</span>  <span class="kw">AS</span> INT)  <span class="cm">-- ✓ 42</span>
+
+<span class="cm">-- Uso práctico: filtrar filas con datos inválidos</span>
+<span class="kw">SELECT</span> ValorImportado
+<span class="kw">FROM</span>   <span class="tbl">ImportacionExcel</span>
+<span class="kw">WHERE</span>  <span class="fn">TRY_CAST</span>(ValorImportado <span class="kw">AS</span> DECIMAL(<span class="nm">10</span>,<span class="nm">2</span>)) <span class="kw">IS NULL</span>; <span class="cm">-- filas con error</span></pre>
+  </div>
+
+  <hr>
+  <h3>④ ISNULL y COALESCE — reemplazar NULLs</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">isnull_coalesce.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">-- ISNULL: si el valor es NULL, devuelve el reemplazo</span>
+<span class="kw">SELECT</span>
+    Nombre,
+    <span class="fn">ISNULL</span>(Telefono, <span class="st">'Sin datos'</span>)    <span class="kw">AS</span> Tel,
+    <span class="fn">ISNULL</span>(Comision, <span class="nm">0</span>)              <span class="kw">AS</span> Comision
+
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;
+
+<span class="cm">-- COALESCE: devuelve el primer valor NO NULL de la lista</span>
+<span class="cm">-- (estándar SQL, más flexible que ISNULL)</span>
+<span class="kw">SELECT</span>
+    Nombre,
+    <span class="fn">COALESCE</span>(Celular, Telefono, Email, <span class="st">'Sin contacto'</span>) <span class="kw">AS</span> Contacto
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;
+
+<span class="cm">-- COALESCE para calcular con NULLs de forma segura</span>
+<span class="kw">SELECT</span>
+    Sueldo <span class="op">+</span> <span class="fn">COALESCE</span>(Comision, <span class="nm">0</span>) <span class="kw">AS</span> SueldoTotal
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="tip success">
+    <span class="tip-icon">💡</span>
+    <div>Preferí <code>COALESCE</code> sobre <code>ISNULL</code> cuando tenés más de una alternativa o cuando necesitás código portable (es estándar SQL). Ambas hacen lo mismo con un solo argumento de reemplazo.</div>
+  </div>
+
+  <hr>
+  <h3>⑤ Demo interactivo — conversión de tipos</h3>
+
+  <div class="demo-box">
+    <div class="demo-header">Ingresá un valor y elegí a qué tipo convertirlo</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <label>Valor:</label>
+        <input type="text" id="conv-input" value="3.14159" oninput="updateConvDemo()" style="flex:1;min-width:120px">
+        <label>Convertir a:</label>
+        <select id="conv-type" onchange="updateConvDemo()">
+          <option value="int">INT</option>
+          <option value="decimal">DECIMAL(10,2)</option>
+          <option value="varchar">VARCHAR</option>
+          <option value="bit">BIT</option>
+        </select>
+      </div>
+      <div class="demo-result-grid" id="conv-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5 — NÚMEROS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-numeros">
+  <h2>Funciones numéricas</h2>
+  <p class="section-intro">Funciones para redondear, truncar, obtener valores absolutos, calcular potencias y raíces, y generar números aleatorios.</p>
+
+  <div class="fn-grid">
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">ROUND</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Redondea un número a la cantidad de decimales indicada. Si decimales es negativo, redondea a la izquierda del punto.</div>
+        <div class="fn-syntax">ROUND(numero, decimales)</div>
+        <div class="fn-example">ROUND(3.567, 2) → <span class="ret-val">3.570</span><br>ROUND(3.567, 0) → <span class="ret-val">4.000</span><br>ROUND(345, -2) → <span class="ret-val">300</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">FLOOR</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve el mayor entero menor o igual al número (redondea hacia abajo).</div>
+        <div class="fn-syntax">FLOOR(numero)</div>
+        <div class="fn-example">FLOOR(3.9) → <span class="ret-val">3</span><br>FLOOR(-3.1) → <span class="ret-val">-4</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">CEILING</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve el menor entero mayor o igual al número (redondea hacia arriba).</div>
+        <div class="fn-syntax">CEILING(numero)</div>
+        <div class="fn-example">CEILING(3.1) → <span class="ret-val">4</span><br>CEILING(-3.9) → <span class="ret-val">-3</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">ABS</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve el valor absoluto (siempre positivo) de un número.</div>
+        <div class="fn-syntax">ABS(numero)</div>
+        <div class="fn-example">ABS(-42) → <span class="ret-val">42</span><br>ABS(7) → <span class="ret-val">7</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">POWER</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Calcula base elevada a la potencia indicada.</div>
+        <div class="fn-syntax">POWER(base, exponente)</div>
+        <div class="fn-example">POWER(2, 10) → <span class="ret-val">1024</span><br>POWER(3, 3) → <span class="ret-val">27</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">SQRT</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Calcula la raíz cuadrada de un número. El número debe ser positivo.</div>
+        <div class="fn-syntax">SQRT(numero)</div>
+        <div class="fn-example">SQRT(144) → <span class="ret-val">12</span><br>SQRT(2) → <span class="ret-val">1.4142...</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">RAND</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Genera un número decimal aleatorio entre 0 y 1. Con semilla, el resultado es reproducible.</div>
+        <div class="fn-syntax">RAND() / RAND(semilla)</div>
+        <div class="fn-example">RAND() → <span class="ret-val">0.7382...</span><br>RAND(42) → <span class="ret-val">siempre igual</span></div>
+      </div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-card-header"><span class="fn-name">SIGN</span><span class="fn-type-badge badge-numero">Número</span></div>
+      <div class="fn-card-body">
+        <div class="fn-desc">Devuelve el signo del número: 1 (positivo), 0 (cero), -1 (negativo).</div>
+        <div class="fn-syntax">SIGN(numero)</div>
+        <div class="fn-example">SIGN(100) → <span class="ret-val">1</span><br>SIGN(-5) → <span class="ret-val">-1</span><br>SIGN(0) → <span class="ret-val">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Demo interactivo — calculadora de funciones numéricas</h3>
+
+  <div class="demo-box">
+    <div class="demo-header">Ingresá un número y mirá cómo actúa cada función</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <label>Número:</label>
+        <input type="text" id="num-input" value="-7.654" oninput="updateNumDemo()" style="flex:1;min-width:120px">
+        <label>Decimales (ROUND):</label>
+        <input type="text" id="num-dec" value="1" oninput="updateNumDemo()" style="width:50px">
+      </div>
+      <div class="demo-result-grid" id="num-result"></div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Caso práctico — cálculo de totales con redondeo</h3>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">numeros_practico.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Producto,
+    PrecioBase,
+    <span class="cm">-- Precio con IVA redondeado a 2 decimales</span>
+    <span class="fn">ROUND</span>(PrecioBase <span class="op">*</span> <span class="nm">1.21</span>, <span class="nm">2</span>)          <span class="kw">AS</span> PrecioConIVA,
+
+    <span class="cm">-- Precio siempre hacia arriba (para no cobrar de menos)</span>
+    <span class="fn">CEILING</span>(PrecioBase <span class="op">*</span> <span class="nm">1.21</span>)           <span class="kw">AS</span> PrecioCeiling,
+
+    <span class="cm">-- Diferencia con el precio de lista (valor absoluto)</span>
+    <span class="fn">ABS</span>(PrecioBase <span class="op">-</span> PrecioLista)          <span class="kw">AS</span> Diferencia,
+
+    <span class="cm">-- Descuento: si hay pérdida (negativo) → 0</span>
+    <span class="fn">CASE</span> <span class="kw">WHEN</span> PrecioBase <span class="op">-</span> Costo <span class="op">&gt;</span> <span class="nm">0</span>
+         <span class="kw">THEN</span> <span class="fn">ROUND</span>(PrecioBase <span class="op">-</span> Costo, <span class="nm">2</span>)
+         <span class="kw">ELSE</span> <span class="nm">0</span>
+    <span class="kw">END</span>                                    <span class="kw">AS</span> Ganancia
+
+<span class="kw">FROM</span> <span class="tbl">Productos</span>;</pre>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6 — QUIZ
+══════════════════════════════════════════ -->
+<div class="section" id="tab-quiz">
+  <h2>Quiz — Ponete a prueba</h2>
+  <p class="section-intro">6 preguntas para verificar que entendiste las funciones nativas de SQL Server.</p>
+  <div id="quiz-container"></div>
+  <div id="quiz-score" class="quiz-score" style="display:none">
+    <div class="score-num" id="score-val"></div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Volver a intentar</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Funciones Nativas de SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/funciones_nativas_sql_server.js"></script>
+</body>
+</html>

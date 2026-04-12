@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Server — Material de Clases</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="institute">Instituto Superior de Formación Docente y Técnica N° 43 &mdash; Lobos, Buenos Aires</div>
+
+    <div class="header-eyebrow">
+      <div class="live-dot"></div>
+      <span class="eyebrow-text">Material interactivo · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones</span>
+    </div>
+
+    <h1>
+      <span class="line1">Gestión</span>
+      <span class="line2">de Bases de Datos</span>
+    </h1>
+
+    <p class="header-desc">
+      Material de estudio interactivo para la materia. Cada clase incluye teoría, ejemplos con código SQL real, y un quiz para autoevaluarte.
+    </p>
+
+    <div class="header-meta">
+      <div class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Año <strong>2026</strong></span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        <span><strong>3</strong> clases disponibles + <strong>1</strong> repaso</span>
+      </div>
+      <div class="meta-sep"></div>
+      <div class="meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span><strong>SQL Server</strong> · T-SQL</span>
+      </div>
+    </div>
+  </header>
+
+  <hr class="divider">
+
+  <div class="section-label">Cómo usar este material</div>
+
+  <div class="portal-grid">
+    <div class="portal-card">
+      <div class="portal-kicker">Recorrido sugerido</div>
+      <h3>Entrá por orden de clase</h3>
+      <p>La secuencia está pensada para acompañar la cursada. Cada tema retoma ideas de la clase anterior y agrega ejemplos más complejos.</p>
+      <ul class="portal-list">
+        <li>Empezá por la Clase 01 si es tu primer repaso.</li>
+        <li>Usá la numeración para seguir el mismo orden visto en aula.</li>
+        <li>Volvé al índice desde cada página para saltar entre temas.</li>
+      </ul>
+    </div>
+    <div class="portal-card">
+      <div class="portal-kicker">Modalidad</div>
+      <h3>Teoría, código y repaso</h3>
+      <p>Cada clase combina explicación conceptual, sintaxis en T-SQL y ejemplos concretos para que el alumno pueda repasar sin depender del apunte en papel.</p>
+      <ul class="portal-list">
+        <li>Leé la idea general antes de mirar la sintaxis.</li>
+        <li>Compará ejemplos y errores frecuentes.</li>
+        <li>Cerrá cada recorrido con el quiz de autoevaluación.</li>
+      </ul>
+    </div>
+    <div class="portal-card">
+      <div class="portal-kicker">Actualización</div>
+      <h3>Material vivo de cursada</h3>
+      <p>Este espacio se va ampliando clase a clase. Las tarjetas marcadas como disponibles ya se pueden estudiar; las próximas se irán sumando a medida que avance el curso.</p>
+      <ul class="portal-list">
+        <li>Tomalo como portal central de la materia.</li>
+        <li>Revisá este índice para ver nuevo contenido.</li>
+        <li>La referencia rápida queda siempre accesible al final.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!--<div class="section-label">Qué vimos / Qué sigue</div>
+
+  <div class="course-flow">
+    <div class="flow-card seen">
+      <div class="flow-card-label">Qué vimos</div>
+      <h3>Base conceptual ya disponible</h3>
+      <p>Las primeras clases cubren herramientas clave para escribir consultas con más control, más expresividad y mejor lectura.</p>
+      <ul class="flow-list">
+        <li>Funciones nativas para texto, fechas, conversiones y números.</li>
+        <li>Lógica condicional con <code>CASE</code> dentro de consultas.</li>
+        <li>Subconsultas para filtrar, comparar y resolver consultas anidadas.</li>
+      </ul>
+    </div>
+    <div class="flow-card next">
+      <div class="flow-card-label">Qué sigue</div>
+      <h3>Próximos temas de la cursada</h3>
+      <p>Este índice va a seguir creciendo con nuevas clases y puede funcionar como referencia acumulativa durante todo el año.</p>
+      <ul class="flow-list">
+        <li>Nuevas unidades se sumarán aquí a medida que avance la materia.</li>
+        <li>Las próximas tarjetas aparecerán publicadas en este mismo portal.</li>
+        <li>Cada nuevo tema mantendrá el mismo formato de teoría, ejemplos y repaso.</li>
+      </ul>
+    </div>
+  </div>-->
+
+  <!-- CLASES -->
+  <div class="section-label">Clases disponibles</div>
+
+  <div class="cards-grid">
+	
+	
+    <!-- FUNCIONES NATIVAS -->
+    <a class="lesson-card green" href="pages/funciones_nativas_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">f(x)</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 01</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Funciones Nativas de SQL Server</div>
+        <div class="card-desc">Herramientas del lenguaje para manipular texto, calcular con fechas, convertir tipos de datos y operar con números, sin salir de la consulta.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>Cadenas: UPPER, LOWER, SUBSTRING, TRIM, REPLACE…</li>
+          <li><span class="topic-dot"></span>Fechas: GETDATE, DATEDIFF, DATEADD, FORMAT…</li>
+          <li><span class="topic-dot"></span>Conversión: CAST, CONVERT, TRY_CAST, COALESCE…</li>
+          <li><span class="topic-dot"></span>Números: ROUND, FLOOR, CEILING, ABS, POWER…</li>
+          <li><span class="topic-dot"></span>Demos interactivos en cada sección</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">🔤 Cadenas</span>
+            <span class="tab-badge">📅 Fechas</span>
+            <span class="tab-badge">🔄 Conversión</span>
+            <span class="tab-badge">🔢 Números</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>	
+	
+    <!-- CASE -->
+    <a class="lesson-card orange" href="pages/clausula_case_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">CASE</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 02</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Cláusula CASE en SQL Server</div>
+        <div class="card-desc">Lógica condicional dentro de tus consultas. Transformá valores, clasificá datos y construí columnas calculadas sin salir del SELECT.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>¿Qué es CASE y en qué se diferencia del IF?</li>
+          <li><span class="topic-dot"></span>CASE simple vs. CASE buscado</li>
+          <li><span class="topic-dot"></span>Usos prácticos: rangos, ORDER BY, agregaciones</li>
+          <li><span class="topic-dot"></span>CASE anidado y alternativa con AND</li>
+          <li><span class="topic-dot"></span>Errores comunes: orden de WHEN, NULLs, tipos</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">📖 Intro</span>
+            <span class="tab-badge">📐 Sintaxis</span>
+            <span class="tab-badge">🛠️ Usos</span>
+            <span class="tab-badge">🔀 Anidado</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
+	
+    <!-- SUBCONSULTAS -->
+    <a class="lesson-card blue" href="pages/subconsultas_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">( )</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 03</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Subconsultas en SQL Server</div>
+        <div class="card-desc">Consultas anidadas dentro de otras consultas. Una de las herramientas más poderosas del lenguaje SQL para filtrar, comparar y calcular datos.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>¿Qué es una subconsulta y cómo funciona?</li>
+          <li><span class="topic-dot"></span>Subconsultas en WHERE, SELECT y FROM</li>
+          <li><span class="topic-dot"></span>Tipos: escalar, de lista, correlacionada</li>
+          <li><span class="topic-dot"></span>Operadores IN, EXISTS, NOT IN, ANY, ALL</li>
+          <li><span class="topic-dot"></span>Performance: cuándo usar JOIN en su lugar</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">📖 Intro</span>
+            <span class="tab-badge">📍 Ubicación</span>
+            <span class="tab-badge">⚙️ Tipos</span>
+            <span class="tab-badge">🔑 Operadores</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
+
+
+
+    <!-- PRÓXIMAMENTE -->
+    <div class="soon-card">
+      <div>
+        <div class="card-title">Próximas clases</div>
+        <div class="card-desc" style="margin-top:10px">Más contenido en preparación</div>
+      </div>
+      <div class="soon-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/></svg>
+        Próximamente
+      </div>
+    </div>
+
+  </div>
+
+  <!-- REFERENCIA RÁPIDA -->
+  <div class="section-label">Referencia rápida — sintaxis clave</div>
+
+  <div class="ref-grid">
+
+    <div class="ref-card">
+      <div class="ref-card-label">Funciones de cadena</div>
+      <div class="ref-card-content">
+        <span class="fn">UPPER</span>(<span class="fn">TRIM</span>(col))<br>
+        <span class="fn">SUBSTRING</span>(col, <span class="nm">1</span>, <span class="nm">3</span>)<br>
+        <span class="fn">REPLACE</span>(col, <span class="st">'-'</span>, <span class="st">''</span>)<br>
+        <span class="fn">CONCAT</span>(col1, <span class="st">' '</span>, col2)<br>
+        <span class="fn">LEN</span>(col)
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">Funciones de fecha</div>
+      <div class="ref-card-content">
+        <span class="fn">GETDATE</span>()<br>
+        <span class="fn">YEAR</span>(col) / <span class="fn">MONTH</span>(col)<br>
+        <span class="fn">DATEDIFF</span>(year, col, <span class="fn">GETDATE</span>())<br>
+        <span class="fn">DATEADD</span>(day, <span class="nm">30</span>, col)<br>
+        <span class="fn">FORMAT</span>(col, <span class="st">'dd/MM/yyyy'</span>)
+      </div>
+    </div>
+	
+	<div class="ref-card">
+      <div class="ref-card-label">CASE simple</div>
+      <div class="ref-card-content">
+        <span class="kw">CASE</span> columna<br>
+        &nbsp;&nbsp;<span class="kw">WHEN</span> <span class="nm">1</span> <span class="kw">THEN</span> <span class="st">'Uno'</span><br>
+        &nbsp;&nbsp;<span class="kw">WHEN</span> <span class="nm">2</span> <span class="kw">THEN</span> <span class="st">'Dos'</span><br>
+        &nbsp;&nbsp;<span class="kw">ELSE</span> <span class="st">'Otro'</span><br>
+        <span class="kw">END</span>
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">CASE buscado</div>
+      <div class="ref-card-content">
+        <span class="kw">CASE</span><br>
+        &nbsp;&nbsp;<span class="kw">WHEN</span> col <span class="op">&gt;=</span> <span class="nm">100</span> <span class="kw">THEN</span> <span class="st">'Alto'</span><br>
+        &nbsp;&nbsp;<span class="kw">WHEN</span> col <span class="op">&gt;=</span>  <span class="nm">50</span> <span class="kw">THEN</span> <span class="st">'Medio'</span><br>
+        &nbsp;&nbsp;<span class="kw">ELSE</span> <span class="st">'Bajo'</span><br>
+        <span class="kw">END</span> <span class="kw">AS</span> Categoria
+      </div>
+    </div>
+	
+    <div class="ref-card">
+      <div class="ref-card-label">Subconsulta en WHERE</div>
+      <div class="ref-card-content">
+        <span class="kw">SELECT</span> col<br>
+        <span class="kw">FROM</span> Tabla<br>
+        <span class="kw">WHERE</span> col <span class="op">&gt;</span> (<br>
+        &nbsp;&nbsp;<span class="kw">SELECT</span> <span class="fn">AVG</span>(col)<br>
+        &nbsp;&nbsp;<span class="kw">FROM</span> Tabla<br>
+        );
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">EXISTS</div>
+      <div class="ref-card-content">
+        <span class="kw">SELECT</span> col<br>
+        <span class="kw">FROM</span> TablaA a<br>
+        <span class="kw">WHERE</span> <span class="kw">EXISTS</span> (<br>
+        &nbsp;&nbsp;<span class="kw">SELECT</span> <span class="nm">1</span><br>
+        &nbsp;&nbsp;<span class="kw">FROM</span> TablaB b<br>
+        &nbsp;&nbsp;<span class="kw">WHERE</span> b.id <span class="op">=</span> a.id<br>
+        );
+      </div>
+    </div>
+
+  </div>
+
+    <div class="section-label">Repaso recomendado</div>
+
+  <div class="cards-grid" style="margin-bottom:56px">
+    <a class="lesson-card purple" href="pages/repaso_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">RPT</div>
+          <div class="card-header-meta">
+            <span class="card-num">MATERIAL BASE</span>
+            <span class="status-pill">Repaso</span>
+          </div>
+        </div>
+        <div class="card-title">Repaso de conceptos previos</div>
+        <div class="card-desc">Un resumen en una sola página para recuperar ideas centrales del año anterior antes de avanzar con temas nuevos de SQL Server.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>Inserción, modificación, eliminación</li>
+          <li><span class="topic-dot"></span>SELECT, filtros con WHERE y ordenamiento</li>
+          <li><span class="topic-dot"></span>Funciones, Procedimientos y Vistas</li>
+          <li><span class="topic-dot"></span>Cards interactivas con detalle por tema</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">Fundamentos</span>
+            <span class="tab-badge">Consultas base</span>
+            <span class="tab-badge">Relaciones</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      <strong>Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones - Gestión de Bases de Datos</strong><br>
+      Instituto Superior de Formación Docente y Técnica N° 43 &mdash; Lobos, Buenos Aires
+    </div>
+    <div class="footer-right">
+      <span class="footer-pill">SQL Server</span>
+      <span class="footer-pill">T-SQL</span>
+      <span class="footer-pill">SSMS</span>
+    </div>
+  </footer>
+
+  <a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+    <span class="classroom-fab-icon">GC</span>
+    Classroom
+  </a>
+
+</div><!-- /container -->
+</body>
+</html>

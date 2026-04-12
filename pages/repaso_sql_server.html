@@ -1,0 +1,754 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repaso de SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/repaso_sql_server.css">
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-top">
+      <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+    </div>
+    <div class="badge">Conceptos previos · SQL Server</div>
+    <h1>Repaso integral de <span>consultas y objetos</span> <span>de SQL Server</span></h1>
+    <p class="subtitle">Conceptos vistos en Bases de Datos (2° año) con ejemplos y sintaxis clave.</p>
+  </header>
+
+  <div class="hero-note">
+    <div class="hero-card">
+      <h2>Cómo usar este repaso</h2>
+      <p>Los temas incluyen operaciones básicas sobre datos, filtros, combinaciones y finalmente objetos y restricciones más avanzadas. Hacé click en cualquier card para abrir el desarrollo debajo.</p>
+      <ul class="hero-list">
+        <li>Empezá por DML si querés repasar acciones básicas.</li>
+        <li>Saltá a WHERE, JOINs o agregación si querés repasar consultas.</li>
+        <li>Dejá vistas, funciones, procedimientos y constraints para el cierre técnico.</li>
+      </ul>
+    </div>
+    <div class="mini-card">
+      <h2>Qué se muestra</h2>
+      <p>INSERT, UPDATE, DELETE, SELECT, filtros con WHERE, JOINs, ORDER BY, TOP, UNION, agregación, GROUP BY, HAVING, vistas, funciones de usuario, procedimientos almacenados y restricciones. Temas vistos en Bases de Datos de 2° año.</p>
+    </div>
+  </div>
+
+  <div class="section-label">Temas de repaso</div>
+
+  <div class="cards-grid">
+    <button class="topic-card active" data-topic="dml" onclick="showTopic('dml')">
+      <div class="topic-top">
+        <div class="topic-icon">DML</div>
+        <span class="topic-num">TEMA 01</span>
+      </div>
+      <h3>INSERT, UPDATE, DELETE y SELECT</h3>
+      <p>Las operaciones básicas para insertar, modificar, borrar y consultar datos dentro de una tabla.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">CRUD</span>
+        <span class="topic-tag">base</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="where" onclick="showTopic('where')">
+      <div class="topic-top">
+        <div class="topic-icon">WHR</div>
+        <span class="topic-num">TEMA 02</span>
+      </div>
+      <h3>Filtrado con WHERE</h3>
+      <p>Condiciones, comparaciones, rangos, patrones y valores nulos para filtrar resultados.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">LIKE</span>
+        <span class="topic-tag">IN</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="joins" onclick="showTopic('joins')">
+      <div class="topic-top">
+        <div class="topic-icon">JON</div>
+        <span class="topic-num">TEMA 03</span>
+      </div>
+      <h3>JOINs</h3>
+      <p>Cómo obtener información desde múltiples tablas relacionadas usando INNER, LEFT y RIGHT JOIN.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">INNER</span>
+        <span class="topic-tag">LEFT/RIGHT</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="order" onclick="showTopic('order')">
+      <div class="topic-top">
+        <div class="topic-icon">ORD</div>
+        <span class="topic-num">TEMA 04</span>
+      </div>
+      <h3>ORDER BY</h3>
+      <p>Cómo ordenar resultados de forma ascendente o descendente según una o más columnas.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">DESC</span>
+        <span class="topic-tag">ASC</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="top" onclick="showTopic('top')">
+      <div class="topic-top">
+        <div class="topic-icon">TOP</div>
+        <span class="topic-num">TEMA 05</span>
+      </div>
+      <h3>TOP</h3>
+      <p>Limitación de filas para mostrar solo una parte del resultado, con o sin empates.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">WITH TIES</span>
+        <span class="topic-tag">limitación</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="union" onclick="showTopic('union')">
+      <div class="topic-top">
+        <div class="topic-icon">UNN</div>
+        <span class="topic-num">TEMA 06</span>
+      </div>
+      <h3>UNION</h3>
+      <p>Combinación de resultados de dos consultas compatibles, con o sin eliminación de duplicados.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">UNION ALL</span>
+        <span class="topic-tag">combinación</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="agregacion" onclick="showTopic('agregacion')">
+      <div class="topic-top">
+        <div class="topic-icon">AGG</div>
+        <span class="topic-num">TEMA 07</span>
+      </div>
+      <h3>Agregación, GROUP BY y HAVING</h3>
+      <p>Conteos, promedios, sumas y agrupaciones para resumir conjuntos de datos.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">COUNT</span>
+        <span class="topic-tag">AVG</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="vistas" onclick="showTopic('vistas')">
+      <div class="topic-top">
+        <div class="topic-icon">VIEW</div>
+        <span class="topic-num">TEMA 08</span>
+      </div>
+      <h3>Vistas</h3>
+      <p>Tablas virtuales definidas por una consulta, útiles para presentar datos ya organizados.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">CREATE VIEW</span>
+        <span class="topic-tag">reutilización</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="funciones" onclick="showTopic('funciones')">
+      <div class="topic-top">
+        <div class="topic-icon">UDF</div>
+        <span class="topic-num">TEMA 09</span>
+      </div>
+      <h3>Funciones escalares de usuario</h3>
+      <p>Funciones creadas por el usuario para encapsular cálculos y devolver un único valor.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">RETURNS</span>
+        <span class="topic-tag">cálculo</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="sp" onclick="showTopic('sp')">
+      <div class="topic-top">
+        <div class="topic-icon">SP</div>
+        <span class="topic-num">TEMA 10</span>
+      </div>
+      <h3>Procedimientos almacenados</h3>
+      <p>Bloques reutilizables de instrucciones SQL para consultar, insertar, modificar o eliminar datos.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">EXEC</span>
+        <span class="topic-tag">parámetros</span>
+      </div>
+    </button>
+
+    <button class="topic-card" data-topic="constraints" onclick="showTopic('constraints')">
+      <div class="topic-top">
+        <div class="topic-icon">CHK</div>
+        <span class="topic-num">TEMA 11</span>
+      </div>
+      <h3>Restricciones</h3>
+      <p>Reglas que protegen la integridad de los datos: PK, FK, NOT NULL, UNIQUE, CHECK y DEFAULT.</p>
+      <div class="topic-tags">
+        <span class="topic-tag">integridad</span>
+        <span class="topic-tag">validación</span>
+      </div>
+    </button>
+  </div>
+
+  <div class="detail-panel" id="detalle">
+    <div class="detail-head">
+      <div class="detail-title">
+        <small>Detalle del tema</small>
+        <h2 id="detail-heading">INSERT, UPDATE, DELETE y SELECT</h2>
+      </div>
+      <div class="detail-tip">Elegí otra card para cambiar el contenido</div>
+    </div>
+
+    <div class="detail-content">
+      <section class="topic-detail active" id="topic-dml" data-title="INSERT, UPDATE, DELETE y SELECT">
+        <div class="concept-box">
+          Las sentencias <strong>INSERT</strong>, <strong>UPDATE</strong>, <strong>DELETE</strong> y <strong>SELECT</strong> forman la base del trabajo diario con SQL Server: agregan, modifican, eliminan y consultan información.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Qué hace cada una</h4>
+            <ul>
+              <li><code>INSERT</code> agrega nuevas filas.</li>
+              <li><code>UPDATE</code> modifica valores existentes.</li>
+              <li><code>DELETE</code> elimina filas.</li>
+              <li><code>SELECT</code> consulta datos.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Cuidado importante</h4>
+            <p>En <code>UPDATE</code> y <code>DELETE</code>, omitir <code>WHERE</code> puede afectar muchas filas al mismo tiempo. Es una de las advertencias más importantes para quienes recién empiezan.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Operaciones básicas</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">INSERT INTO</span> Paises (id, nombre)
+<span class="kw">VALUES</span> (<span class="nm">1</span>, <span class="st">'Argentina'</span>);
+
+<span class="kw">UPDATE</span> Ciudades
+<span class="kw">SET</span> nombre <span class="op">=</span> <span class="st">'Lobos'</span>
+<span class="kw">WHERE</span> Id <span class="op">=</span> <span class="nm">1</span>;
+
+<span class="kw">DELETE FROM</span> Paises
+<span class="kw">WHERE</span> Id <span class="op">=</span> <span class="nm">2</span>;
+
+<span class="kw">SELECT</span> id, nombre
+<span class="kw">FROM</span> productos;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-where" data-title="Filtrado con WHERE">
+        <div class="concept-box">
+          <strong>WHERE</strong> permite seleccionar solo las filas que cumplen una condición. Es la base para hacer consultas útiles y no traer todos los registros sin criterio.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Operadores de comparación</h4>
+            <ul>
+              <li><strong><code> = , < , > </code></strong> para comparaciones simples. igual, menor o mayor</li>
+               <li><code>!= o <></code> para excluir valores (distinto de)</li>
+              <li><code>BETWEEN</code> para rangos entre dos valores</li>
+              <li><code>LIKE</code> para patrones de texto.</li>
+              <li><code>IS NULL / IS NOT NULL</code> para buscar valores nulos o no.</li>
+              <li><code>IN</code> para listas fijas.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Utilización</h4>
+            <p>Los operadores de comparación pueden combinarse con operadores lógicos como <code> AND y OR </code> para formar condiciones más complejas. El uso de paréntesis permite agruparlas y controlar su orden de evaluación, como en la operaciones matematicas. </p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Filtros frecuentes</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">WHERE</span> precio <span class="op">&gt;</span> <span class="nm">15</span>; <span class="cm">-- productos con precio mayor a 15</span>
+
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">WHERE</span> precio <span class="kw">BETWEEN</span> <span class="nm">50</span> <span class="kw">AND</span> <span class="nm">150</span>; <span class="cm">-- productos con precio entre 100 y 150, incluidos esos valores</span>
+
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">WHERE</span> nombre <span class="kw">LIKE</span> <span class="st">'%ora'</span>;<span class="cm">-- productos cuyo nombre termine en 'ora', por ejemplo computadora</span>
+
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">WHERE</span> descripcion <span class="kw">IS NULL</span>; <span class="cm">-- productos cuya descripcion sea nula</span>
+
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">WHERE</span> precio <span class="kw">IN</span> <span class="nm">(100, 200, 300)</span>; <span class="cm">-- productos cuyos precios sean 100, 200 o 300</span>
+
+</code></pre>        
+</div>
+      </section>
+
+      <section class="topic-detail" id="topic-joins" data-title="JOINs">
+        <div class="concept-box">
+          Los <strong>JOINs</strong> sirven para consultar datos de varias tablas relacionadas. Son esenciales cuando la información está normalizada y no vive en una sola tabla.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Tipos principales</h4>
+            <ul>
+              <li><code>INNER JOIN</code>: devuelve coincidencias en ambas tablas.</li>
+              <li><code>LEFT JOIN</code>: conserva todas las filas de la tabla a la izquierda del JOIN.</li>
+              <li><code>RIGHT JOIN</code>: conserva todas las filas de la tabla a la derecha del JOIN.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Qué mirar siempre</h4>
+            <p>La condición del <code>ON</code> es tan importante como el tipo de join. Si esa condición está mal, el resultado también va a estarlo, incluso si la consulta corre.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">INNER y LEFT JOIN</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT</span>
+  v.fecha,
+  c.nombre,
+  v.importe
+<span class="kw">FROM</span> Ventas v
+<span class="kw">INNER JOIN</span> Clientes c <span class="kw">ON</span> c.clienteId <span class="op">=</span> v.clienteId;
+
+<span class="kw">SELECT</span> c.nombre, p.nombre
+<span class="kw">FROM</span> Ciudades c
+<span class="kw">LEFT JOIN</span> Paises p <span class="kw">ON</span> c.pais_id <span class="op">=</span> p.id;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-order" data-title="ORDER BY">
+        <div class="concept-box">
+          <strong>ORDER BY</strong> se usa para ordenar el resultado de una consulta según una o más columnas, de forma ascendente o descendente.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Qué permite hacer</h4>
+            <ul>
+              <li>Ordenar por una columna numérica, de texto, de fecha, etc.</li>
+              <li>Usar <code>ASC</code> o <code>DESC</code>.</li>
+              <li>Si no se indica <code>ASC</code> o <code>DESC</code> el orden predeterminado es ascendente(ASC).</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Punto clave</h4>
+            <p>Si no usás <code>ORDER BY</code>, el orden del resultado no está garantizado. Por eso conviene utilizarlo como parte esencial de una consulta que necesita una presentación ordenada.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Orden ascendente y descendente</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">ORDER BY</span> precio <span class="kw">ASC</span>;
+
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> productos
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC</span>;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-top" data-title="TOP">
+        <div class="concept-box">
+          <strong>TOP</strong> limita la cantidad de filas que devuelve una consulta. Es útil cuando querés mostrar solo los primeros registros del resultado, o realizar una paginación.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Qué conviene recordar</h4>
+            <ul>
+              <li><code>TOP 10</code> devuelve solo diez filas.</li>
+              <li><code>WITH TIES</code> agrega empates con la última fila incluida.</li>
+              <li><code>TOP</code> se debe usar siempre con <code>ORDER BY</code></li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Punto clave</h4>
+            <p>Sin un orden definido, no queda claro cuáles son los “primeros” registros. Por eso `TOP` y `ORDER BY` suelen enseñarse juntos aunque sean conceptos distintos.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">TOP y WITH TIES</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT TOP</span> <span class="nm">10</span> nombre, precio
+<span class="kw">FROM</span> Productos
+<span class="kw">ORDER BY</span> precio;
+
+<span class="kw">SELECT TOP</span> <span class="nm">10</span> <span class="kw">WITH TIES</span> nombre, precio
+<span class="kw">FROM</span> Productos
+<span class="kw">ORDER BY</span> precio;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-union" data-title="UNION">
+        <div class="concept-box">
+          <strong>UNION</strong> combina los resultados de dos consultas compatibles. <strong>UNION ALL</strong> hace lo mismo, pero sin eliminar duplicados.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Condición necesaria</h4>
+            <ul>
+              <li>Las consultas deben devolver la misma cantidad de columnas.</li>
+              <li>Los tipos de datos deben ser compatibles.</li>
+              <li>El orden de las columnas debe corresponderse.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Diferencia clave</h4>
+            <p><code>UNION</code> limpia duplicados; <code>UNION ALL</code> conserva todo. Esa diferencia es útil para comparar datasets o juntar listados de origen distinto.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">UNION y UNION ALL</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT</span> nombre, edad <span class="kw">FROM</span> ciclistas
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> nombre, edad <span class="kw">FROM</span> patinadores;
+
+<span class="kw">SELECT</span> nombre, edad <span class="kw">FROM</span> ciclistas
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> nombre, edad <span class="kw">FROM</span> patinadores;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-agregacion" data-title="Agregación, GROUP BY y HAVING">
+        <div class="concept-box">
+          Las funciones de agregación hacen un resumen de los datos. <strong>GROUP BY</strong> arma grupos y <strong>HAVING</strong> filtra esos grupos una vez calculados los resultados agregados.
+        </div>
+        <div class="agg-visual">
+          <div class="agg-table">
+            <div class="agg-row head">
+              <span>producto</span>
+              <span>categoría</span>
+            </div>
+            <div class="agg-row">
+              <span>Cuchillo</span>
+              <span class="agg-group-cocina">Cocina</span>
+            </div>
+            <div class="agg-row">
+              <span>Sartén</span>
+              <span class="agg-group-cocina">Cocina</span>
+            </div>
+            <div class="agg-row">
+              <span>Jeans</span>
+              <span class="agg-group-ropa">Ropa</span>
+            </div>
+            <div class="agg-row">
+              <span>Remera</span>
+              <span class="agg-group-ropa">Ropa</span>
+            </div>
+            <div class="agg-row">
+              <span>Smart TV</span>
+              <span class="agg-group-electronica">Electrónica</span>
+            </div>
+          </div>
+          <div class="agg-arrow">→</div>
+          <div class="agg-table">
+            <div class="agg-row head">
+              <span>categoría</span>
+              <span>count</span>
+            </div>
+            <div class="agg-row">
+              <span class="agg-group-cocina">Cocina</span>
+              <span class="agg-group-cocina">2</span>
+            </div>
+            <div class="agg-row">
+              <span class="agg-group-ropa">Ropa</span>
+              <span class="agg-group-ropa">2</span>
+            </div>
+            <div class="agg-row">
+              <span class="agg-group-electronica">Electrónica</span>
+              <span class="agg-group-electronica">1</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Funciones de agregacion</h4>
+            <ul>
+              <li><code>AVG(expr)</code> Promedio.</li>
+              <li><code>COUNT(expr)</code> Recuento.</li>
+              <li><code>MAX(expr)</code> Máximo.</li>
+              <li><code>MIN(expr)</code> Mínimo.</li>
+              <li><code>SUM(expr)</code> Suma.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Diferencia importante</h4>
+            <p><code>WHERE</code> filtra filas antes de agrupar. <code>HAVING</code> filtra grupos después de calcular la agregación. Esa diferencia suele costar al principio, así que conviene remarcarla.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">COUNT, GROUP BY y HAVING</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">SELECT</span> <span class="fn">COUNT</span>(id)
+<span class="kw">FROM</span> productos;
+
+<span class="kw">SELECT</span> categoria, <span class="fn">SUM</span>(precio)
+<span class="kw">FROM</span> productos
+<span class="kw">GROUP BY</span> categoria;
+
+<span class="kw">SELECT</span> categoria, <span class="fn">AVG</span>(precio)
+<span class="kw">FROM</span> producto
+<span class="kw">GROUP BY</span> categoria
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(precio) <span class="op">&gt;</span> <span class="nm">3.0</span>;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-vistas" data-title="Vistas">
+        <div class="concept-box">
+          Una <strong>vista</strong> es una tabla virtual basada en una consulta. No almacena datos propios, sino que muestra resultados obtenidos desde otras tablas de forma organizada.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Para qué sirve</h4>
+            <ul>
+              <li>Reutilizar consultas frecuentes.</li>
+              <li>Presentar datos ya procesados.</li>
+              <li>Simplificar acceso a consultas más complejas.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Cómo pensarla</h4>
+            <p>Podés verla como una consulta guardada con nombre.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Crear y consultar una vista</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="cm">-- crear una vista</span>
+<span class="kw">CREATE VIEW</span> v_PreciosCategoria
+<span class="kw">AS</span>
+<span class="kw">SELECT</span>
+  c.categoria,
+  <span class="fn">SUM</span>(p.precio) <span class="kw">AS</span> Total
+<span class="kw">FROM</span> Categorias c
+<span class="kw">INNER JOIN</span> Productos p <span class="kw">ON</span> p.categoriaid <span class="op">=</span> c.categoriaid
+<span class="kw">GROUP BY</span> c.categoria;
+
+<span class="cm">-- consultar una vista</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> v_PreciosCategoria;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-funciones" data-title="Funciones escalares de usuario">
+        <div class="concept-box">
+          Las <strong>funciones escalares de usuario</strong> reciben uno o más parámetros, ejecutan lógica y devuelven un único valor. Son útiles cuando querés encapsular cálculos reutilizables.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Características</h4>
+            <ul>
+              <li>Se crean con <code>CREATE FUNCTION</code>.</li>
+              <li>Definen un tipo de retorno con <code>RETURNS</code>.</li>
+              <li>Devuelven un único valor.</li>
+              <li>Se pueden invocar desde una consulta.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Cuándo usarla</h4>
+            <p>Cuando un cálculo se repite y querés centralizarlo y encapsularlo dentro de la base de datos.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Función escalar</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">CREATE FUNCTION</span> uf_TotalVentasCliente(@ClienteID <span class="kw">INT</span>)
+<span class="kw">RETURNS</span> <span class="kw">NUMERIC</span>(<span class="nm">10</span>, <span class="nm">2</span>)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">DECLARE</span> @TotalVentas <span class="kw">NUMERIC</span>(<span class="nm">10</span>, <span class="nm">2</span>);
+  <span class="kw">SELECT</span> @TotalVentas <span class="op">=</span> <span class="fn">SUM</span>(importe)
+  <span class="kw">FROM</span> Ventas
+  <span class="kw">WHERE</span> ClienteID <span class="op">=</span> @ClienteID;
+  <span class="kw">RETURN</span> @TotalVentas;
+<span class="kw">END</span>;</code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-sp" data-title="Procedimientos almacenados">
+        <div class="concept-box">
+          Un <strong>procedimiento almacenado</strong> es un conjunto de instrucciones SQL guardadas en la base. Puede recibir parámetros y ejecutar consultas u operaciones de inserción, modificación o eliminación.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Tipos principales</h4>
+            <ul>
+              <li>Procedimiento de consulta.</li>
+              <li>Procedimiento de inserción.</li>
+              <li>Procedimiento de modificación.</li>
+              <li>Procedimiento de eliminación.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Cómo se ejecutan</h4>
+            <p>Se invocan normalmente con <code>EXEC</code> o <code>EXECUTE</code>, pasando parámetros según el orden o por nombre.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Consulta</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="cm">-- Creacion</span>
+<span class="kw">CREATE PROCEDURE</span> sp_SelClientes
+(@ciudadid <span class="kw">AS int</span>)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">SELECT</span> razonSocial, nroDoc
+  <span class="kw">FROM</span> Clientes
+  <span class="kw">WHERE</span> ciudadid <span class="op">=</span> @ciudadid
+<span class="kw">END</span>;
+
+<span class="cm">-- Utilizacion</span>
+<span class="kw">EXEC</span> sp_SelClientes @ciudadid = <span class="nm">1</span></code></pre>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Inserción</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><pre><code><span class="cm">-- Creacion</span>
+<span class="kw">CREATE PROCEDURE</span> sp_InsClientes
+(@razonsocial <span class="kw">AS varchar</span>(<span class="nm">30</span>),
+ @nrodoc <span class="kw">AS varchar</span>(<span class="nm">30</span>),
+ @ciudadid <span class="kw">AS int</span>)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">INSERT INTO</span> Clientes (razonSocial, nroDoc, ciudadid)
+  <span class="kw">VALUES</span> (@razonsocial, @nrodoc, @ciudadid)
+<span class="kw">END</span>;
+
+<span class="cm">-- Utilizacion</span>
+<span class="kw">EXEC</span> sp_InsClientes @razonsocial = <span class="st">'Martin Cancer'</span>, @nrodoc = <span class="st">'31111234'</span>, @ciudadid =<span class="nm">1</span></code></pre>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Modificación</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="cm">-- Creacion</span>
+<span class="kw">CREATE PROCEDURE</span> sp_UpdCliente
+(@razonsocial <span class="kw">AS varchar</span>(<span class="nm">30</span>),
+ @nrodoc <span class="kw">AS varchar</span>(<span class="nm">30</span>),
+ @ciudadid <span class="kw">AS int</span>,
+ @clienteid <span class="kw">AS int</span>)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">UPDATE</span> Clientes
+  <span class="kw">SET</span> razonSocial <span class="op">=</span> @razonsocial,
+      nroDoc <span class="op">=</span> @nrodoc,
+      ciudadid <span class="op">=</span> @ciudadid
+  <span class="kw">WHERE</span> clienteid <span class="op">=</span> @clienteid
+<span class="kw">END</span>;
+
+<span class="cm">-- Utilizacion</span>
+<span class="kw">EXEC</span> sp_UpdCliente @razonsocial = <span class="st">'Juan Perez'</span>, @nrodoc = <span class="st">'21122134'</span>, @ciudadid =<span class="nm">2</span>,  @clienteid = <span class="nm">1</span></code></pre>
+        </div>
+         <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">Eliminación</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="cm">-- Creacion</span>
+<span class="kw">CREATE PROCEDURE</span> sp_DelClientes
+(@clienteid <span class="kw">AS int</span>)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">DELETE FROM</span> Clientes
+  <span class="kw">WHERE</span> clienteid <span class="op">=</span> @clienteid
+<span class="kw">END</span>;
+
+<span class="cm">-- Utilizacion</span>
+<span class="kw">EXEC</span> sp_DelClientes @clienteid = <span class="nm">1</span></code></pre>
+        </div>
+      </section>
+
+      <section class="topic-detail" id="topic-constraints" data-title="Restricciones">
+        <div class="concept-box">
+          Las <strong>constraints</strong> son reglas que se aplican a las columnas o tablas para proteger la integridad de los datos. Ayudan a evitar registros inválidos o inconsistentes.
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h4>Restricciones mas comunes</h4>
+            <ul>
+              <li><code>PRIMARY KEY</code> identifica de manera única.</li>
+              <li><code>FOREIGN KEY</code> mantiene relación entre tablas.</li>
+              <li><code>NOT NULL</code> obliga a cargar un valor.</li>
+              <li><code>UNIQUE</code> evita duplicados.</li>
+              <li><code>CHECK</code> valida una condición.</li>
+              <li><code>DEFAULT</code> asigna un valor por defecto.</li>
+            </ul>
+          </div>
+          <div class="detail-card">
+            <h4>Importancia de las restricciones</h4>
+            <p>Las restricciones tiene un gran valor en la base de datos realicionales ya que protegen reglas del negocio y la calidad de los datos.</p>
+          </div>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">PK, FK, NOT NULL y UNIQUE</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">ALTER TABLE</span> Clientes
+<span class="kw">ADD CONSTRAINT</span> PK_Clientes <span class="kw">PRIMARY KEY</span> (ID);
+
+<span class="kw">ALTER TABLE</span> Pedidos
+<span class="kw">ADD CONSTRAINT</span> FK_Pedidos_Clientes <span class="kw">FOREIGN KEY</span> (ClienteID)
+<span class="kw">REFERENCES</span> Clientes (ID);
+
+<span class="kw">ALTER TABLE</span> Pedidos
+<span class="kw">ALTER COLUMN</span> ClienteID <span class="kw">INT NOT NULL</span>;
+
+<span class="kw">ALTER TABLE</span> Productos
+<span class="kw">ADD CONSTRAINT</span> UQ_Productos_Codigo <span class="kw">UNIQUE</span> (Codigo);</code></pre>
+        </div>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <div class="code-title">CHECK y DEFAULT</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><span class="kw">ALTER TABLE</span> Ventas
+<span class="kw">ADD CONSTRAINT</span> CHK_Importe <span class="kw">CHECK</span> (Importe <span class="op">&gt;</span> <span class="nm">0</span>);
+
+<span class="kw">ALTER TABLE</span> Clientes
+<span class="kw">ADD CONSTRAINT</span> DF_Clientes_FechaAlta
+<span class="kw">DEFAULT</span> <span class="fn">GETDATE</span>() <span class="kw">FOR</span> FechaAlta;</code></pre>
+        </div>
+        <div class="hint"><strong>Recordatorio:</strong> las constraints no son solo sintaxis. Son reglas de negocio aplicadas directamente en la base para evitar datos inválidos desde cualquier aplicación que la use.</div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <strong>Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones - Gestión de Bases de Datos</strong><br>
+      Instituto Superior de Formación Docente y Técnica N° 43 &mdash; Lobos, Buenos Aires
+    </div>
+    <div class="footer-right">
+      <span class="footer-pill">SQL Server</span>
+      <span class="footer-pill">T-SQL</span>
+      <span class="footer-pill">SSMS</span>
+    </div>
+  </footer>
+</div>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/repaso_sql_server.js"></script>
+</body>
+</html>

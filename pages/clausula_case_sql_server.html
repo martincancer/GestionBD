@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cláusula CASE en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/clausula_case_sql_server.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 02 · SQL Server</div>
+  <h1>Cláusula <span>CASE</span><br>en SQL Server</h1>
+  <p class="subtitle">Lógica condicional dentro de tus consultas: transformá valores, clasificá datos y construí columnas calculadas sin salir del SELECT.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('sintaxis',1)">📐 Sintaxis</button>
+  <button class="nav-btn" onclick="showTab('usos',2)">🛠️ Usos prácticos</button>
+  <button class="nav-btn" onclick="showTab('anidado',3)">🔀 CASE anidado</button>
+  <button class="nav-btn" onclick="showTab('errores',4)">⚠️ Errores comunes</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     TAB 1: INTRODUCCIÓN
+══════════════════════════════════════════ -->
+<div class="section active" id="tab-intro">
+  <h2>¿Qué es la cláusula CASE?</h2>
+  <p class="section-intro">CASE es la forma de escribir lógica condicional <strong style="color:var(--text)">del tipo SI/ENTONCES/SINO</strong> directamente dentro de una sentencia SQL. Funciona como el <code>IF-ELSE</code> de otros lenguajes, pero integrado en cualquier parte de tu consulta.</p>
+
+  <div class="concepto">
+    CASE <strong>no es una sentencia</strong>, es una <strong>expresión</strong>. Eso significa que devuelve un valor y podés usarla en cualquier lugar donde pondría una columna o un valor: en SELECT, ORDER BY, WHERE, GROUP BY, e incluso dentro de funciones de agregación.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('sintaxis',1)">
+      <div class="card-icon">CASE</div>
+      <h3>Dos formas de escribirlo</h3>
+      <p>CASE simple y CASE buscado. Distintos escenarios, misma lógica.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--blue)" onclick="showTab('usos',2)">
+      <div class="card-icon">→</div>
+      <h3>Usos prácticos</h3>
+      <p>Clasificar datos, pivotar resultados, columnas calculadas, rangos.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('anidado',3)">
+      <div class="card-icon">{ }</div>
+      <h3>CASE anidado</h3>
+      <p>CASE dentro de CASE para condiciones más complejas.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--coral)" onclick="showTab('errores',4)">
+      <div class="card-icon">!</div>
+      <h3>Errores comunes</h3>
+      <p>Las trampas más frecuentes: tipos de dato, NULL, orden de condiciones.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h3>El equivalente programático</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Si venís de otro lenguaje, CASE es el IF-ELSE de SQL:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card simple">
+      <div class="compare-card-header">En un lenguaje de programación</div>
+      <pre><span class="cm">// pseudocódigo</span>
+<span class="kw">if</span> (sueldo > 100000) {
+    categoria = <span class="st">"Alto"</span>
+} <span class="kw">else if</span> (sueldo > 50000) {
+    categoria = <span class="st">"Medio"</span>
+} <span class="kw">else</span> {
+    categoria = <span class="st">"Bajo"</span>
+}</pre>
+    </div>
+    <div class="compare-card buscado">
+      <div class="compare-card-header">En SQL con CASE</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> sueldo <span class="op">&gt;</span> <span class="nm">100000</span>
+    <span class="kw">THEN</span> <span class="st">'Alto'</span>
+  <span class="kw">WHEN</span> sueldo <span class="op">&gt;</span> <span class="nm">50000</span>
+    <span class="kw">THEN</span> <span class="st">'Medio'</span>
+  <span class="kw">ELSE</span> <span class="st">'Bajo'</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <span class="tip-icon">💡</span>
+    <div>CASE siempre termina con <code>END</code>. Es obligatorio. Si falta, SQL Server lanza un error de sintaxis.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2: SINTAXIS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-sintaxis">
+  <h2>Las dos formas de CASE</h2>
+  <p class="section-intro">SQL Server admite dos variantes. La diferencia está en <strong style="color:var(--text)">dónde se pone la condición de comparación</strong>.</p>
+
+  <!-- CASE SIMPLE -->
+  <h3>① CASE simple — compara contra valores exactos</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Se escribe la expresión a comparar una sola vez, después de CASE. Cada WHEN especifica un valor posible.</p>
+
+  <div class="syntax-box">
+    <span class="syn-kw">CASE</span> <span class="syn-ph">expresion</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">valor1</span> <span class="syn-kw">THEN</span> <span class="syn-ph">resultado1</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">valor2</span> <span class="syn-kw">THEN</span> <span class="syn-ph">resultado2</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">...</span><br>
+    &nbsp;&nbsp;<span class="syn-opt">ELSE</span> <span class="syn-ph">resultado_por_defecto</span> &nbsp;<span class="syn-label">← opcional, pero recomendado</span><br>
+    <span class="syn-kw">END</span>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_simple.sql — traducir un código a texto</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Nombre,
+    IdEstado,
+    <span class="hl">    <span class="kw">CASE</span> IdEstado
+        <span class="kw">WHEN</span> <span class="nm">1</span> <span class="kw">THEN</span> <span class="st">'Activo'</span>
+        <span class="kw">WHEN</span> <span class="nm">2</span> <span class="kw">THEN</span> <span class="st">'Suspendido'</span>
+        <span class="kw">WHEN</span> <span class="nm">3</span> <span class="kw">THEN</span> <span class="st">'Retirado'</span>
+        <span class="kw">ELSE</span>     <span class="st">'Desconocido'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> EstadoDescripcion</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>Cómo lo evalúa SQL Server</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>Evalúa <code>IdEstado</code> para cada fila.</div></li>
+      <li><div class="step-num">2</div><div>Recorre los WHEN de <strong>arriba hacia abajo</strong> y devuelve el THEN del primer WHEN que coincide.</div></li>
+      <li><div class="step-num">3</div><div>Si ningún WHEN coincide, devuelve el valor del <strong>ELSE</strong>.</div></li>
+      <li><div class="step-num">4</div><div>Si no hay ELSE y ningún WHEN coincide, devuelve <strong>NULL</strong>.</div></li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- CASE BUSCADO -->
+  <h3>② CASE buscado — condiciones libres con operadores</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">No hay expresión después de CASE. Cada WHEN tiene su propia condición completa, lo que permite usar <code>&gt;</code>, <code>&lt;</code>, <code>LIKE</code>, <code>BETWEEN</code>, <code>IS NULL</code>, etc.</p>
+
+  <div class="syntax-box">
+    <span class="syn-kw">CASE</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">condicion1</span> <span class="syn-kw">THEN</span> <span class="syn-ph">resultado1</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">condicion2</span> <span class="syn-kw">THEN</span> <span class="syn-ph">resultado2</span><br>
+    &nbsp;&nbsp;<span class="syn-rep">WHEN</span> <span class="syn-ph">...</span><br>
+    &nbsp;&nbsp;<span class="syn-opt">ELSE</span> <span class="syn-ph">resultado_por_defecto</span><br>
+    <span class="syn-kw">END</span>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_buscado.sql — clasificar por rango de sueldo</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Nombre,
+    Sueldo,
+    <span class="hl">    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">150000</span> <span class="kw">THEN</span> <span class="st">'Premium'</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span> <span class="kw">THEN</span> <span class="st">'Alto'</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span>  <span class="nm">50000</span> <span class="kw">THEN</span> <span class="st">'Medio'</span>
+        <span class="kw">ELSE</span>                         <span class="st">'Básico'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> Categoria</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <div>El orden de los WHEN <strong>importa</strong>. SQL Server devuelve el resultado del <em>primer</em> WHEN verdadero y no evalúa el resto. Si ponés <code>WHEN Sueldo >= 50000</code> antes que <code>WHEN Sueldo >= 100000</code>, todos los sueldos altos caerán en la categoría equivocada. Siempre definí las condiciones de <strong>mayor a menor especificidad</strong>.</div>
+  </div>
+
+  <hr>
+  <h3>Diferencias clave</h3>
+
+  <table class="op-table">
+    <thead><tr><th></th><th>CASE simple</th><th>CASE buscado</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Expresión</td>
+        <td style="color:var(--text)">Una vez, después de CASE</td>
+        <td style="color:var(--text)">Cada WHEN tiene la suya</td>
+      </tr>
+      <tr>
+        <td>Comparación</td>
+        <td style="color:var(--text)">Solo igualdad (=)</td>
+        <td style="color:var(--text)">Cualquier operador: &gt;, &lt;, LIKE, BETWEEN, IS NULL…</td>
+      </tr>
+      <tr>
+        <td>Maneja NULL</td>
+        <td style="color:var(--coral)">No (WHEN NULL no funciona)</td>
+        <td style="color:var(--green)">Sí (WHEN col IS NULL)</td>
+      </tr>
+      <tr>
+        <td>Cuándo usarlo</td>
+        <td style="color:var(--text)">Valores discretos conocidos</td>
+        <td style="color:var(--text)">Rangos, condiciones complejas</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3: USOS PRÁCTICOS
+══════════════════════════════════════════ -->
+<div class="section" id="tab-usos">
+  <h2>Usos prácticos</h2>
+  <p class="section-intro">CASE aparece en muchos escenarios del mundo real. Estos son los más frecuentes.</p>
+
+  <!-- Demo interactivo -->
+  <h3>① Clasificación por rangos — demo interactivo</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Modificá el sueldo con el slider y mirá cómo CASE lo clasifica en tiempo real:</p>
+
+  <div class="demo-box">
+    <div class="demo-header">Simulador CASE — clasificación de sueldos</div>
+    <div class="demo-body">
+      <div class="demo-controls">
+        <label>Sueldo: $<strong id="sueldo-val">85000</strong></label>
+        <input type="range" min="10000" max="200000" step="5000" value="85000" id="sueldo-slider" oninput="updateDemo()">
+      </div>
+      <div class="demo-result" id="demo-result"></div>
+    </div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">clasificacion_rangos.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Nombre,
+    Sueldo,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">150000</span> <span class="kw">THEN</span> <span class="st">'Premium'</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span> <span class="kw">THEN</span> <span class="st">'Alto'</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span>  <span class="nm">50000</span> <span class="kw">THEN</span> <span class="st">'Medio'</span>
+        <span class="kw">ELSE</span>                         <span class="st">'Básico'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> Categoria
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <hr>
+
+  <!-- CASE en ORDER BY -->
+  <h3>② CASE en ORDER BY — orden personalizado</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Podés definir un orden lógico que no sigue el alfabético ni el numérico.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_order_by.sql — ordenar por prioridad de estado</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> Nombre, Estado
+<span class="kw">FROM</span>   <span class="tbl">Tickets</span>
+<span class="kw">ORDER BY</span>
+    <span class="hl">    <span class="kw">CASE</span> Estado
+        <span class="kw">WHEN</span> <span class="st">'Crítico'</span>  <span class="kw">THEN</span> <span class="nm">1</span>
+        <span class="kw">WHEN</span> <span class="st">'Urgente'</span>  <span class="kw">THEN</span> <span class="nm">2</span>
+        <span class="kw">WHEN</span> <span class="st">'Normal'</span>   <span class="kw">THEN</span> <span class="nm">3</span>
+        <span class="kw">WHEN</span> <span class="st">'Cerrado'</span>  <span class="kw">THEN</span> <span class="nm">4</span>
+        <span class="kw">ELSE</span>              <span class="nm">99</span>
+    <span class="kw">END</span></span>,
+    FechaCreacion <span class="kw">ASC</span>;</pre>
+  </div>
+
+  <hr>
+
+  <!-- CASE en agregaciones -->
+  <h3>③ CASE dentro de funciones de agregación</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Una de las combinaciones más poderosas: contar o sumar solo las filas que cumplen cierta condición.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_con_sum.sql — contar empleados por categoría en una sola pasada</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="op">*</span>)                                              <span class="kw">AS</span> Total,
+    <span class="hl">    <span class="fn">SUM</span>(<span class="kw">CASE</span> <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> Categoria_Alto,</span>
+    <span class="hl">    <span class="fn">SUM</span>(<span class="kw">CASE</span> <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span>  <span class="nm">50000</span>
+              <span class="kw">AND</span>  Sueldo  <span class="op">&lt;</span> <span class="nm">100000</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> Categoria_Medio,</span>
+    <span class="hl">    <span class="fn">SUM</span>(<span class="kw">CASE</span> <span class="kw">WHEN</span> Sueldo  <span class="op">&lt;</span>  <span class="nm">50000</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> Categoria_Basico</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>¿Por qué funciona?</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>CASE devuelve <strong>1</strong> si la condición se cumple, <strong>0</strong> si no.</div></li>
+      <li><div class="step-num">2</div><div>SUM suma todos esos 1s → el total de filas que cumplen la condición.</div></li>
+      <li><div class="step-num">3</div><div>Esto es equivalente a hacer tres COUNT con WHERE diferentes, pero en <strong>una sola consulta</strong>.</div></li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- CASE para manejar NULLs -->
+  <h3>④ Manejo de NULLs con CASE</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">CASE buscado puede reemplazar valores NULL con un texto legible.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_null.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    Nombre,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Telefono <span class="kw">IS NULL</span> <span class="kw">THEN</span> <span class="st">'Sin teléfono'</span>
+        <span class="kw">ELSE</span> Telefono
+    <span class="kw">END</span> <span class="kw">AS</span> ContactoTelefono
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;
+
+<span class="cm">-- Nota: ISNULL() hace lo mismo en este caso concreto</span>
+<span class="cm">-- pero CASE es más flexible para lógica compleja</span></pre>
+  </div>
+
+  <div class="tip success">
+    <span class="tip-icon">💡</span>
+    <div>SQL Server también tiene <code>ISNULL(col, 'valor')</code> y <code>COALESCE(col1, col2)</code> para reemplazar NULLs de forma más concisa. Pero cuando necesitás condiciones más complejas que solo "es NULL o no", CASE es la herramienta.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4: CASE ANIDADO
+══════════════════════════════════════════ -->
+<div class="section" id="tab-anidado">
+  <h2>CASE anidado</h2>
+  <p class="section-intro">Podés poner un CASE dentro del THEN o del ELSE de otro CASE. Esto permite lógica de <strong style="color:var(--text)">múltiples dimensiones</strong>: primero clasificás por una columna, y dentro de cada rama por otra.</p>
+
+  <div class="concepto">
+    CASE anidado es poderoso, pero debe usarse con criterio. Si el anidamiento supera 2 o 3 niveles, la consulta se vuelve difícil de leer y mantener. En esos casos, conviene revisar si la lógica puede expresarse con condiciones AND/OR en un solo CASE buscado.
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_anidado.sql — categoría según departamento y sueldo</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    e.Nombre,
+    d.NombreDepto,
+    e.Sueldo,
+    <span class="kw">CASE</span> d.NombreDepto
+        <span class="kw">WHEN</span> <span class="st">'Sistemas'</span> <span class="kw">THEN</span>
+            <span class="hl">            <span class="kw">CASE</span>
+                <span class="kw">WHEN</span> e.Sueldo <span class="op">&gt;=</span> <span class="nm">120000</span> <span class="kw">THEN</span> <span class="st">'Tech Senior'</span>
+                <span class="kw">WHEN</span> e.Sueldo <span class="op">&gt;=</span>  <span class="nm">80000</span> <span class="kw">THEN</span> <span class="st">'Tech Mid'</span>
+                <span class="kw">ELSE</span>                          <span class="st">'Tech Junior'</span>
+            <span class="kw">END</span></span>
+        <span class="kw">WHEN</span> <span class="st">'Ventas'</span> <span class="kw">THEN</span>
+            <span class="hl">            <span class="kw">CASE</span>
+                <span class="kw">WHEN</span> e.Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span> <span class="kw">THEN</span> <span class="st">'Vendedor A'</span>
+                <span class="kw">ELSE</span>                          <span class="st">'Vendedor B'</span>
+            <span class="kw">END</span></span>
+        <span class="kw">ELSE</span> <span class="st">'Área general'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> NivelEmpleado
+<span class="kw">FROM</span>      <span class="tbl">Empleados</span>   e
+<span class="kw">JOIN</span>      <span class="tbl">Departamentos</span> d
+    <span class="kw">ON</span>  d.IdDepartamento <span class="op">=</span> e.IdDepartamento;</pre>
+  </div>
+
+  <div class="explicacion">
+    <h4>Cómo lo evalúa SQL Server</h4>
+    <ul class="step-list">
+      <li><div class="step-num">1</div><div>El CASE exterior evalúa <code>NombreDepto</code>: si es <strong>'Sistemas'</strong>, entra al primer CASE interior.</div></li>
+      <li><div class="step-num">2</div><div>El CASE interior evalúa el sueldo dentro del contexto de ese departamento.</div></li>
+      <li><div class="step-num">3</div><div>Si el departamento es <strong>'Ventas'</strong>, entra al segundo CASE interior con su propio umbral.</div></li>
+      <li><div class="step-num">4</div><div>Si el departamento no es ninguno de los anteriores, el ELSE exterior devuelve <strong>'Área general'</strong> directamente, sin entrar a ningún CASE interno.</div></li>
+    </ul>
+  </div>
+
+  <hr>
+  <h3>Alternativa: AND en un solo CASE buscado</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">El mismo resultado, más legible. En vez de anidar, combinás condiciones con AND:</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">case_con_and.sql — equivalente sin anidamiento</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span>
+    e.Nombre,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> d.NombreDepto <span class="op">=</span> <span class="st">'Sistemas'</span> <span class="kw">AND</span> e.Sueldo <span class="op">&gt;=</span> <span class="nm">120000</span>
+             <span class="kw">THEN</span> <span class="st">'Tech Senior'</span>
+        <span class="kw">WHEN</span> d.NombreDepto <span class="op">=</span> <span class="st">'Sistemas'</span> <span class="kw">AND</span> e.Sueldo <span class="op">&gt;=</span> <span class="nm">80000</span>
+             <span class="kw">THEN</span> <span class="st">'Tech Mid'</span>
+        <span class="kw">WHEN</span> d.NombreDepto <span class="op">=</span> <span class="st">'Sistemas'</span>
+             <span class="kw">THEN</span> <span class="st">'Tech Junior'</span>
+        <span class="kw">WHEN</span> d.NombreDepto <span class="op">=</span> <span class="st">'Ventas'</span>   <span class="kw">AND</span> e.Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span>
+             <span class="kw">THEN</span> <span class="st">'Vendedor A'</span>
+        <span class="kw">WHEN</span> d.NombreDepto <span class="op">=</span> <span class="st">'Ventas'</span>
+             <span class="kw">THEN</span> <span class="st">'Vendedor B'</span>
+        <span class="kw">ELSE</span> <span class="st">'Área general'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> NivelEmpleado
+<span class="kw">FROM</span>  <span class="tbl">Empleados</span>     e
+<span class="kw">JOIN</span>  <span class="tbl">Departamentos</span> d
+   <span class="kw">ON</span>  d.IdDepartamento <span class="op">=</span> e.IdDepartamento;</pre>
+  </div>
+
+  <div class="tip success">
+    <span class="tip-icon">💡</span>
+    <div>En la mayoría de los casos, la versión con AND en un solo CASE buscado es preferible al anidamiento: es más fácil de leer, de modificar y de depurar.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 5: ERRORES COMUNES
+══════════════════════════════════════════ -->
+<div class="section" id="tab-errores">
+  <h2>Errores comunes</h2>
+  <p class="section-intro">Estos son los problemas que aparecen con más frecuencia al usar CASE. Conocerlos de antemano te ahorra mucho tiempo de debugging.</p>
+
+  <!-- Error 1 -->
+  <h3>① Olvidar el END</h3>
+
+  <div class="compare-grid">
+    <div class="compare-card simple">
+      <div class="compare-card-header">❌ Error — falta END</div>
+      <pre><span class="kw">SELECT</span>
+    Nombre,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;</span> <span class="nm">100000</span>
+        <span class="kw">THEN</span> <span class="st">'Alto'</span>
+        <span class="kw">ELSE</span> <span class="st">'Normal'</span>
+    <span class="cm">-- falta END ↑</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+    </div>
+    <div class="compare-card buscado">
+      <div class="compare-card-header">✓ Correcto</div>
+      <pre><span class="kw">SELECT</span>
+    Nombre,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> Sueldo <span class="op">&gt;</span> <span class="nm">100000</span>
+        <span class="kw">THEN</span> <span class="st">'Alto'</span>
+        <span class="kw">ELSE</span> <span class="st">'Normal'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> Cat    <span class="cm">-- ← END</span>
+<span class="kw">FROM</span> <span class="tbl">Empleados</span>;</pre>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Error 2 -->
+  <h3>② Orden incorrecto de condiciones</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">SQL Server devuelve el THEN del <em>primer</em> WHEN verdadero. Si los rangos están mal ordenados, los resultados son incorrectos sin lanzar ningún error.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card simple">
+      <div class="compare-card-header">❌ Mal orden — todos caen en "Medio"</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">50000</span>
+       <span class="kw">THEN</span> <span class="st">'Medio'</span>
+  <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span>
+       <span class="kw">THEN</span> <span class="st">'Alto'</span>  <span class="cm">← nunca llega</span>
+  <span class="kw">ELSE</span> <span class="st">'Básico'</span>
+<span class="kw">END</span></pre>
+    </div>
+    <div class="compare-card buscado">
+      <div class="compare-card-header">✓ Orden correcto — de mayor a menor</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span> <span class="nm">100000</span>
+       <span class="kw">THEN</span> <span class="st">'Alto'</span>   <span class="cm">← primero</span>
+  <span class="kw">WHEN</span> Sueldo <span class="op">&gt;=</span>  <span class="nm">50000</span>
+       <span class="kw">THEN</span> <span class="st">'Medio'</span>
+  <span class="kw">ELSE</span> <span class="st">'Básico'</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="tip danger">
+    <span class="tip-icon">🔴</span>
+    <div>Este error es especialmente peligroso porque <strong>no genera ningún mensaje de error</strong>. La consulta se ejecuta sin problemas pero los datos son incorrectos. Siempre revisá el orden de los WHEN cuando trabajás con rangos numéricos o de fechas.</div>
+  </div>
+
+  <hr>
+
+  <!-- Error 3 -->
+  <h3>③ CASE simple no puede detectar NULLs</h3>
+
+  <div class="compare-grid">
+    <div class="compare-card simple">
+      <div class="compare-card-header">❌ No funciona con NULL</div>
+      <pre><span class="kw">CASE</span> Telefono
+  <span class="kw">WHEN</span> <span class="kw">NULL</span> <span class="kw">THEN</span> <span class="st">'Sin dato'</span>
+  <span class="cm">-- nunca se cumple: NULL = NULL</span>
+  <span class="cm">-- es UNKNOWN, no TRUE</span>
+  <span class="kw">ELSE</span> Telefono
+<span class="kw">END</span></pre>
+    </div>
+    <div class="compare-card buscado">
+      <div class="compare-card-header">✓ Usar CASE buscado con IS NULL</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> Telefono <span class="kw">IS NULL</span>
+       <span class="kw">THEN</span> <span class="st">'Sin dato'</span>
+  <span class="kw">ELSE</span> Telefono
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Error 4 -->
+  <h3>④ Tipos de dato incompatibles entre los THEN</h3>
+  <p style="color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6">Todos los THEN y el ELSE de un mismo CASE deben devolver el mismo tipo de dato (o tipos compatibles). Si mezclás, SQL Server tira error o convierte implícitamente —a veces con resultados inesperados.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card simple">
+      <div class="compare-card-header">❌ Tipos incompatibles</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> activo <span class="op">=</span> <span class="nm">1</span>
+       <span class="kw">THEN</span> <span class="st">'Activo'</span>   <span class="cm">← VARCHAR</span>
+  <span class="kw">ELSE</span> <span class="nm">0</span>              <span class="cm">← INT</span>
+<span class="kw">END</span>
+<span class="cm">-- Error o conversión implícita</span></pre>
+    </div>
+    <div class="compare-card buscado">
+      <div class="compare-card-header">✓ Mismo tipo en todos los THEN</div>
+      <pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> activo <span class="op">=</span> <span class="nm">1</span>
+       <span class="kw">THEN</span> <span class="st">'Activo'</span>
+  <span class="kw">ELSE</span> <span class="st">'Inactivo'</span>  <span class="cm">← VARCHAR</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Resumen -->
+  <h3>Resumen de errores</h3>
+
+  <table class="op-table">
+    <thead><tr><th>Error</th><th>¿Da error?</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Falta END</td>
+        <td style="color:var(--coral)">Sí, sintaxis</td>
+        <td style="color:var(--text)">Siempre cerrar con END.</td>
+      </tr>
+      <tr>
+        <td>Orden de WHEN</td>
+        <td style="color:var(--amber)">No — resultado incorrecto</td>
+        <td style="color:var(--text)">De condición más específica a más general.</td>
+      </tr>
+      <tr>
+        <td>WHEN NULL en CASE simple</td>
+        <td style="color:var(--amber)">No — simplemente no coincide</td>
+        <td style="color:var(--text)">Usar CASE buscado con IS NULL.</td>
+      </tr>
+      <tr>
+        <td>Tipos incompatibles</td>
+        <td style="color:var(--coral)">A veces — depende de la conversión</td>
+        <td style="color:var(--text)">Usar el mismo tipo en todos los THEN / ELSE.</td>
+      </tr>
+      <tr>
+        <td>Sin ELSE</td>
+        <td style="color:var(--amber)">No — devuelve NULL</td>
+        <td style="color:var(--text)">Siempre agregar ELSE para controlar el caso por defecto.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 6: QUIZ
+══════════════════════════════════════════ -->
+<div class="section" id="tab-quiz">
+  <h2>Quiz — Ponete a prueba</h2>
+  <p class="section-intro">5 preguntas para verificar que entendiste la cláusula CASE.</p>
+
+  <div id="quiz-container"></div>
+  <div id="quiz-score" class="quiz-score" style="display:none">
+    <div class="score-num" id="score-val"></div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Volver a intentar</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Cláusula CASE en SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicacioness<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/clausula_case_sql_server.js"></script>
+</body>
+</html>
