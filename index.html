@@ -37,7 +37,7 @@
       <div class="meta-sep"></div>
       <div class="meta-item">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
-        <span><strong>3</strong> clases disponibles + <strong>1</strong> repaso</span>
+        <span><strong>4</strong> clases disponibles + <strong>1</strong> repaso</span>
       </div>
       <div class="meta-sep"></div>
       <div class="meta-item">
@@ -229,6 +229,44 @@
       </div>
     </a>
 
+    <!-- TRIGGERS -->
+    <a class="lesson-card coral" href="pages/triggers_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">TRG</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 04</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Triggers en SQL Server</div>
+        <div class="card-desc">Disparadores automáticos para validar datos, auditar cambios y aplicar reglas de negocio cuando ocurre un INSERT, UPDATE o DELETE.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>Qué es un trigger y cómo se ejecuta</li>
+          <li><span class="topic-dot"></span>Tipos: DML, DDL y LOGON</li>
+          <li><span class="topic-dot"></span>Diferencias entre AFTER e INSTEAD OF</li>
+          <li><span class="topic-dot"></span>Tablas inserted y deleted</li>
+          <li><span class="topic-dot"></span>Ejemplos prácticos y quiz final</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">📖 Intro</span>
+            <span class="tab-badge">⚙️ Tipos</span>
+            <span class="tab-badge">🧾 Tablas</span>
+            <span class="tab-badge">🛠️ Ejemplos</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
+
 
 
     <!-- PRÓXIMAMENTE -->
@@ -316,6 +354,17 @@
         &nbsp;&nbsp;<span class="kw">FROM</span> TablaB b<br>
         &nbsp;&nbsp;<span class="kw">WHERE</span> b.id <span class="op">=</span> a.id<br>
         );
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">Trigger básico</div>
+      <div class="ref-card-content">
+        <span class="kw">CREATE TRIGGER</span> trg_nombre<br>
+        <span class="kw">ON</span> Tabla<br>
+        <span class="kw">AFTER INSERT</span><br>
+        <span class="kw">AS</span><br>
+        <span class="kw">SELECT</span> * <span class="kw">FROM</span> inserted
       </div>
     </div>
 

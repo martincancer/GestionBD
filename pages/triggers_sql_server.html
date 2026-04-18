@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triggers en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/triggers_sql_server.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 04 · SQL Server</div>
+  <h1>Triggers en<br><span>SQL Server</span></h1>
+  <p class="subtitle">Automatizá validaciones, auditorías y controles en la base de datos con disparadores DML, DDL y LOGON, entendiendo cuándo convienen y qué impacto tienen.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('tipos',1)">⚙️ Tipos</button>
+  <button class="nav-btn" onclick="showTab('tablas',2)">🧾 inserted / deleted</button>
+  <button class="nav-btn" onclick="showTab('ejemplos',3)">🛠️ Ejemplos</button>
+  <button class="nav-btn" onclick="showTab('consideraciones',4)">🚦 Consideraciones</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>¿Qué es un trigger?</h2>
+  <p class="section-intro">Un trigger es un procedimiento almacenado especial que SQL Server ejecuta automáticamente cuando ocurre un evento sobre una tabla, una vista, la estructura de la base o incluso una conexión.</p>
+
+  <div class="concepto">
+    A diferencia de un procedimiento almacenado común, <strong>no se invoca manualmente</strong>. Se dispara solo cuando ocurre el evento que lo activa, por ejemplo un <code>INSERT</code>, un <code>UPDATE</code> o un <code>DELETE</code>.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('tipos',1)">
+      <div class="card-icon">TRG</div>
+      <h3>Tipos de trigger</h3>
+      <p>DML, DDL y LOGON. Cambia el evento que los activa y el objetivo de cada uno.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('tablas',2)">
+      <div class="card-icon">tmp</div>
+      <h3>Tablas internas</h3>
+      <p>Las tablas <code>inserted</code> y <code>deleted</code> son clave para entender qué cambió.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--operator)" onclick="showTab('ejemplos',3)">
+      <div class="card-icon">IF</div>
+      <h3>Casos de uso</h3>
+      <p>Validaciones, auditoría, control de cambios y reglas de negocio automáticas.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('consideraciones',4)">
+      <div class="card-icon">⚠</div>
+      <h3>Cuidado práctico</h3>
+      <p>Los triggers son poderosos, pero también pueden afectar rendimiento y trazabilidad.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Flujo de ejecución</h3>
+
+  <div class="flow-strip">
+    <div class="flow-step">Evento ocurre</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Trigger se activa</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Código T-SQL se ejecuta</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">La operación continúa o se cancela</div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>Un trigger forma parte de la transacción que lo disparó. Si hace <code>ROLLBACK</code>, también se deshace la operación original.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-tipos">
+  <h2>Tipos de triggers en SQL Server</h2>
+  <p class="section-intro">SQL Server soporta varios tipos de triggers, según el tipo de evento que queremos observar o interceptar.</p>
+
+  <div class="compare-grid single-column">
+    <div class="compare-card">
+      <div class="compare-header">Triggers DML</div>
+      <div class="compare-body">
+        <p>Se activan con <code>INSERT</code>, <code>UPDATE</code> o <code>DELETE</code> sobre tablas o vistas. Son los más usados para validaciones, auditoría y controles automáticos.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Triggers DDL</div>
+      <div class="compare-body">
+        <p>Se activan ante cambios en la estructura: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>. Sirven para registrar modificaciones del esquema o bloquear cambios no autorizados.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Triggers LOGON</div>
+      <div class="compare-body">
+        <p>Se activan al iniciar sesión en la instancia. Pueden usarse para restringir conexiones por horario, usuario o máquina.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h3>AFTER / FOR vs INSTEAD OF</h3>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Característica</th>
+        <th>AFTER / FOR</th>
+        <th>INSTEAD OF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Momento de ejecución</td>
+        <td>Después de que la operación ocurrió</td>
+        <td>En lugar de la operación</td>
+      </tr>
+      <tr>
+        <td>¿La fila ya existe?</td>
+        <td>Sí, la operación ya impactó en la tabla</td>
+        <td>No todavía; el trigger decide qué hacer</td>
+      </tr>
+      <tr>
+        <td>Uso típico</td>
+        <td>Auditoría, logs, controles posteriores</td>
+        <td>Validaciones previas, vistas actualizables</td>
+      </tr>
+      <tr>
+        <td>¿Puede cancelar la operación?</td>
+        <td>Sí, con <code>ROLLBACK</code></td>
+        <td>Sí, simplemente no ejecutando el cambio</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip warn">
+    <div class="tip-icon">!</div>
+    <div><strong>Diferencia crítica:</strong> en un trigger <code>INSTEAD OF INSERT</code> la fila todavía no está en la tabla al momento del disparo. En un <code>AFTER INSERT</code>, sí.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-tablas">
+  <h2>Las tablas inserted y deleted</h2>
+  <p class="section-intro">Dentro de un trigger DML, SQL Server expone dos tablas temporales especiales con los datos afectados por la operación.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">inserted</div>
+      <div class="compare-body">
+        <ul class="step-list compact">
+          <li><div class="step-num">1</div><div>En un <strong>INSERT</strong>, contiene las filas nuevas.</div></li>
+          <li><div class="step-num">2</div><div>En un <strong>UPDATE</strong>, contiene los valores nuevos.</div></li>
+          <li><div class="step-num">3</div><div>En un <strong>DELETE</strong>, queda vacía.</div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card bad">
+      <div class="compare-header">deleted</div>
+      <div class="compare-body">
+        <ul class="step-list compact">
+          <li><div class="step-num">1</div><div>En un <strong>DELETE</strong>, contiene las filas eliminadas.</div></li>
+          <li><div class="step-num">2</div><div>En un <strong>UPDATE</strong>, contiene los valores anteriores.</div></li>
+          <li><div class="step-num">3</div><div>En un <strong>INSERT</strong>, queda vacía.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>Resumen por operación</h3>
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Operación</th>
+        <th>inserted</th>
+        <th>deleted</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>INSERT</td>
+        <td>Filas nuevas</td>
+        <td>Vacía</td>
+      </tr>
+      <tr>
+        <td>DELETE</td>
+        <td>Vacía</td>
+        <td>Filas eliminadas</td>
+      </tr>
+      <tr>
+        <td>UPDATE</td>
+        <td>Valores nuevos</td>
+        <td>Valores anteriores</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip success">
+    <div class="tip-icon">+</div>
+    <div>Estas tablas permiten comparar estados <strong>antes y después</strong> del cambio, lo que vuelve a los triggers muy útiles para auditoría y validación.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-ejemplos">
+  <h2>Ejemplos prácticos</h2>
+  <p class="section-intro">El documento trabaja tres escenarios típicos y muy didácticos: validación, auditoría y control de cambios.</p>
+
+  <div class="demo-block">
+    <h3>1. Validación con INSTEAD OF INSERT</h3>
+    <p class="section-text">Evita insertar una marca duplicada. Como es <code>INSTEAD OF</code>, el trigger corre antes de que la fila exista realmente en la tabla.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">validacion_marca.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">CREATE OR ALTER TRIGGER</span> tr_Marca
+<span class="kw">ON</span> Marcas
+<span class="kw">INSTEAD OF INSERT</span>
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">SET NOCOUNT ON</span>;
+
+  <span class="kw">IF EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="nm">1</span>
+    <span class="kw">FROM</span> Marcas m
+    <span class="kw">INNER JOIN</span> inserted i <span class="kw">ON</span> m.Marca <span class="op">=</span> i.Marca
+  )
+  <span class="kw">BEGIN</span>
+    <span class="kw">RAISERROR</span>(<span class="st">'La marca ya existe en la tabla.'</span>, <span class="nm">16</span>, <span class="nm">1</span>);
+  <span class="kw">END</span>
+  <span class="kw">ELSE</span>
+  <span class="kw">BEGIN</span>
+    <span class="kw">INSERT INTO</span> Marcas (Marca, PaisID)
+    <span class="kw">SELECT</span> Marca, PaisID
+    <span class="kw">FROM</span> inserted;
+  <span class="kw">END</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>2. Auditoría con AFTER DELETE</h3>
+    <p class="section-text">Registra automáticamente en una tabla de auditoría cada producto eliminado, junto con usuario y fecha.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">auditoria_delete.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">CREATE OR ALTER TRIGGER</span> tr_AuditarEliminacion
+<span class="kw">ON</span> Productos
+<span class="kw">AFTER DELETE</span>
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">SET NOCOUNT ON</span>;
+
+  <span class="kw">INSERT INTO</span> Auditoria (Tabla, Accion, IDAfectado, Usuario, Fecha)
+  <span class="kw">SELECT</span> <span class="st">'Productos'</span>, <span class="st">'DELETE'</span>, d.ProductoID, <span class="fn">SYSTEM_USER</span>, <span class="fn">GETDATE</span>()
+  <span class="kw">FROM</span> deleted d;
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>3. Control de precio con AFTER UPDATE</h3>
+    <p class="section-text">Compara los valores viejos y nuevos para impedir que un precio se reduzca, aplicando <code>ROLLBACK</code> si detecta la situación.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">control_precio.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">CREATE OR ALTER TRIGGER</span> tr_ControlPrecio
+<span class="kw">ON</span> Productos
+<span class="kw">AFTER UPDATE</span>
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">SET NOCOUNT ON</span>;
+
+  <span class="kw">IF EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="nm">1</span>
+    <span class="kw">FROM</span> inserted i
+    <span class="kw">INNER JOIN</span> deleted d <span class="kw">ON</span> i.ProductoID <span class="op">=</span> d.ProductoID
+    <span class="kw">WHERE</span> i.Precio <span class="op">&lt;</span> d.Precio
+  )
+  <span class="kw">BEGIN</span>
+    <span class="kw">ROLLBACK TRANSACTION</span>;
+    <span class="kw">RAISERROR</span>(<span class="st">'No se puede reducir el precio de un producto.'</span>, <span class="nm">16</span>, <span class="nm">1</span>);
+  <span class="kw">END</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>En los ejemplos del documento se trabaja correctamente con <code>inserted</code> y <code>deleted</code> como tablas, no como si fueran una sola fila. Eso hace que soporten operaciones que afectan múltiples registros.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-consideraciones">
+  <h2>Cosas importantes a considerar</h2>
+  <p class="section-intro">Los triggers pueden resolver problemas reales, pero necesitan criterio. Bien usados ayudan mucho; mal usados complican rendimiento y mantenimiento.</p>
+
+  <ul class="step-list">
+    <li><div class="step-num">1</div><div><strong>Forman parte de la transacción.</strong> Si el trigger hace <code>ROLLBACK</code>, también se cancela la operación original.</div></li>
+    <li><div class="step-num">2</div><div><strong>Usá siempre <code>SET NOCOUNT ON</code>.</strong> Evita mensajes de filas afectadas que pueden confundir a la aplicación cliente.</div></li>
+    <li><div class="step-num">3</div><div><strong>INSTEAD OF y AFTER no son equivalentes.</strong> En <code>INSTEAD OF</code> la fila todavía no está aplicada; en <code>AFTER</code> sí.</div></li>
+    <li><div class="step-num">4</div><div><strong>Se pueden habilitar o deshabilitar.</strong> Útil para mantenimiento o cargas masivas.</div></li>
+    <li><div class="step-num">5</div><div><strong>Evitá lógica pesada.</strong> Cursores, consultas costosas o demasiada lógica de negocio pueden degradar el rendimiento.</div></li>
+  </ul>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">habilitar_deshabilitar.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">DISABLE TRIGGER</span> tr_Marca <span class="kw">ON</span> Marcas;
+<span class="kw">ENABLE TRIGGER</span> tr_Marca <span class="kw">ON</span> Marcas;
+
+<span class="kw">DISABLE TRIGGER ALL ON</span> Marcas;</pre>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <h3>Ventajas</h3>
+      <ul>
+        <li>Lógica centralizada en la base.</li>
+        <li>Ejecución automática.</li>
+        <li>Muy útiles para auditoría.</li>
+        <li>Permiten validaciones complejas.</li>
+      </ul>
+    </div>
+    <div class="summary-card danger">
+      <h3>Desventajas</h3>
+      <ul>
+        <li>La lógica queda menos visible.</li>
+        <li>Pueden afectar rendimiento.</li>
+        <li>Pueden encadenarse entre sí.</li>
+        <li>Un error puede cancelar toda la transacción.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="tab-quiz">
+  <h2>Quiz sobre triggers</h2>
+  <p class="section-intro">Cerrá la clase con una autoevaluación rápida para verificar si te quedó clara la diferencia entre tipos de trigger, tablas internas y efectos transaccionales.</p>
+
+  <div id="quiz-container"></div>
+
+  <div class="quiz-score" id="quiz-score" style="display:none;">
+    <div class="score-num" id="score-val">0/0</div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Reintentar quiz</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Triggers en SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/triggers_sql_server.js"></script>
+</body>
+</html>
