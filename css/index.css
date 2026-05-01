@@ -17,6 +17,9 @@
   --green: #39d353;
   --green2: #26a641;
   --green-bg: #0d2b10;
+  --azure: #79c0ff;
+  --azure2: #2f81f7;
+  --azure-bg: #0d1f36;
   --coral: #ff7b72;
   --coral2: #f85149;
   --coral-bg: #2d1010;
@@ -372,6 +375,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .lesson-card.blue:hover   { border-color: var(--blue); }
 .lesson-card.orange:hover { border-color: var(--orange); }
 .lesson-card.green:hover  { border-color: var(--green); }
+.lesson-card.azure:hover  { border-color: var(--azure); }
 .lesson-card.coral {
   border-color: rgba(255,123,114,.16);
 }
@@ -390,6 +394,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .blue   .card-bar { background: linear-gradient(90deg, var(--blue2), var(--blue)); }
 .orange .card-bar { background: linear-gradient(90deg, var(--orange2), var(--orange)); }
 .green  .card-bar { background: linear-gradient(90deg, var(--green2), var(--green)); }
+.azure  .card-bar { background: linear-gradient(90deg, var(--azure2), var(--azure)); }
 .coral  .card-bar,
 .lesson-card.coral .card-bar { background: linear-gradient(90deg, var(--coral2), var(--coral)); }
 .purple .card-bar { background: linear-gradient(90deg, #6e40c9, var(--purple)); }
@@ -425,6 +430,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .blue   .card-icon { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(88,166,255,.2); }
 .orange .card-icon { background: var(--orange-bg);  color: var(--orange); border: 1px solid rgba(240,136,62,.2); }
 .green  .card-icon { background: var(--green-bg);   color: var(--green);  border: 1px solid rgba(57,211,83,.2); }
+.azure  .card-icon { background: var(--azure-bg);   color: var(--azure);  border: 1px solid rgba(121,192,255,.22); }
 .coral  .card-icon,
 .lesson-card.coral .card-icon {
   background: var(--coral-bg);
@@ -502,6 +508,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .blue   .topic-dot { background: var(--blue); }
 .orange .topic-dot { background: var(--orange); }
 .green  .topic-dot { background: var(--green); }
+.azure  .topic-dot { background: var(--azure); }
 .coral  .topic-dot,
 .lesson-card.coral .topic-dot { background: var(--coral); }
 .purple .topic-dot { background: var(--purple); }
@@ -547,6 +554,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .blue   .open-btn { color: var(--blue); }
 .orange .open-btn { color: var(--orange); }
 .green  .open-btn { color: var(--green); }
+.azure  .open-btn { color: var(--azure); }
 .coral  .open-btn,
 .lesson-card.coral .open-btn { color: var(--coral); }
 .purple .open-btn { color: var(--purple); }
