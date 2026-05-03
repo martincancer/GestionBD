@@ -36,6 +36,8 @@
         <span>Repo: <strong>martincancer/GestionBD</strong></span>
         <span>Rama: <strong>master</strong></span>
       </div>
+
+      <button class="secondary-btn" type="button" id="load-resources-btn">Cargar recursos publicados</button>
     </section>
 
     <form class="admin-card" id="resource-form">
@@ -136,6 +138,30 @@
       <p>Después de publicar, GitHub Pages puede tardar unos segundos en reflejar el cambio.</p>
     </aside>
   </main>
+
+  <section class="admin-card published-card">
+    <div class="published-heading">
+      <div>
+        <div class="section-kicker">Recursos publicados</div>
+        <h2>Links y descargas actuales</h2>
+      </div>
+      <button class="secondary-btn compact" type="button" id="refresh-resources-btn">Actualizar lista</button>
+    </div>
+    <div class="published-grid">
+      <div>
+        <h3>Links útiles</h3>
+        <div class="published-list" id="published-links">
+          <p class="empty-state">Cargá los recursos para ver la lista.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Descargas</h3>
+        <div class="published-list" id="published-downloads">
+          <p class="empty-state">Cargá los recursos para ver la lista.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="status-panel" id="status-panel" aria-live="polite">
     <div class="status-title">Estado</div>

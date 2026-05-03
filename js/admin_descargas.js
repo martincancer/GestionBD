@@ -15,6 +15,12 @@ const fileTypeInput = document.querySelector('#file-type');
 const fileSizeInput = document.querySelector('#file-size');
 const statusPanel = document.querySelector('#status-panel');
 const statusLog = document.querySelector('#status-log');
+const loadResourcesBtn = document.querySelector('#load-resources-btn');
+const refreshResourcesBtn = document.querySelector('#refresh-resources-btn');
+const publishedLinks = document.querySelector('#published-links');
+const publishedDownloads = document.querySelector('#published-downloads');
+
+let currentDownloadsState = null;
 
 function setStatus(message, type = '') {
   statusPanel.classList.toggle('status-ok', type === 'ok');
@@ -159,6 +165,17 @@ async function putRepoFile(path, content, message, sha) {
   });
 }
 
+async function deleteRepoFile(path, message, sha) {
+  return githubRequest(contentsPath(path), {
+    method: 'DELETE',
+    body: JSON.stringify({
+      message,
+      sha,
+      branch: githubConfig.branch
+    })
+  });
+}
+
 async function loadDownloadsJson() {
   const remoteFile = await getRepoFile('downloads.json');
   if (!remoteFile) {
@@ -172,6 +189,15 @@ async function loadDownloadsJson() {
     sha: remoteFile.sha,
     data: JSON.parse(base64ToText(remoteFile.content))
   };
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function buildLinkEntry() {
@@ -231,6 +257,7 @@ async function publishLink() {
     `Agregar link: ${entry.title}`,
     sha
   );
+  await refreshPublishedResources(false);
 }
 
 async function publishDownload() {
@@ -271,6 +298,113 @@ async function publishDownload() {
     `Agregar descarga: ${entry.title}`,
     sha
   );
+  await refreshPublishedResources(false);
+}
+
+function renderPublishedResources(state) {
+  const links = state.data.links || [];
+  const downloads = state.data.downloads || [];
+
+  publishedLinks.innerHTML = links.length ? links.map((link, index) => `
+    <article class="published-item">
+      <div class="published-meta">${escapeHtml(link.category || 'Link')}</div>
+      <div class="published-title">${escapeHtml(link.title)}</div>
+      <div class="published-detail">${escapeHtml(link.url)}</div>
+      <div class="published-actions">
+        <button class="danger-btn" type="button" data-delete-link="${index}">Eliminar link</button>
+      </div>
+    </article>
+  `).join('') : '<p class="empty-state">No hay links cargados.</p>';
+
+  publishedDownloads.innerHTML = downloads.length ? downloads.map((download, index) => `
+    <article class="published-item">
+      <div class="published-meta">${escapeHtml(download.category || 'Descarga')}</div>
+      <div class="published-title">${escapeHtml(download.title)}</div>
+      <div class="published-detail">${escapeHtml(download.file || '')}</div>
+      <div class="published-actions">
+        <button class="danger-btn soft" type="button" data-delete-download-entry="${index}">Eliminar entrada</button>
+        <button class="danger-btn" type="button" data-delete-download-file="${index}">Eliminar entrada y archivo</button>
+      </div>
+    </article>
+  `).join('') : '<p class="empty-state">No hay descargas cargadas.</p>';
+}
+
+async function refreshPublishedResources(showMessage = true) {
+  if (showMessage) setStatus('Cargando recursos publicados desde GitHub...');
+  currentDownloadsState = await loadDownloadsJson();
+  currentDownloadsState.data.links = Array.isArray(currentDownloadsState.data.links) ? currentDownloadsState.data.links : [];
+  currentDownloadsState.data.downloads = Array.isArray(currentDownloadsState.data.downloads) ? currentDownloadsState.data.downloads : [];
+  renderPublishedResources(currentDownloadsState);
+  if (showMessage) setStatus('Recursos publicados cargados correctamente.', 'ok');
+}
+
+async function deleteLink(index) {
+  const state = await loadDownloadsJson();
+  const links = Array.isArray(state.data.links) ? state.data.links : [];
+  const item = links[index];
+  if (!item) throw new Error('No se encontró el link a eliminar.');
+
+  const confirmed = window.confirm(`¿Eliminar el link "${item.title}" de downloads.json?`);
+  if (!confirmed) return;
+
+  links.splice(index, 1);
+  state.data.links = links;
+  state.data.downloads = Array.isArray(state.data.downloads) ? state.data.downloads : [];
+
+  setStatus('Eliminando link de downloads.json...');
+  await putRepoFile(
+    'downloads.json',
+    textToBase64(`${JSON.stringify(state.data, null, 2)}\n`),
+    `Eliminar link: ${item.title}`,
+    state.sha
+  );
+  await refreshPublishedResources(false);
+  setStatus('Link eliminado correctamente.', 'ok');
+}
+
+async function deleteDownload(index, removeFile) {
+  const state = await loadDownloadsJson();
+  const downloads = Array.isArray(state.data.downloads) ? state.data.downloads : [];
+  const item = downloads[index];
+  if (!item) throw new Error('No se encontró la descarga a eliminar.');
+
+  const message = removeFile
+    ? `¿Eliminar la entrada "${item.title}" y también el archivo downloads/${item.file}?`
+    : `¿Eliminar solo la entrada "${item.title}" de downloads.json? El archivo queda en downloads.`;
+
+  const confirmed = window.confirm(message);
+  if (!confirmed) return;
+
+  let remoteFile = null;
+  if (removeFile) {
+    setStatus(`Buscando archivo downloads/${item.file}...`);
+    remoteFile = await getRepoFile(`downloads/${item.file}`);
+    if (!remoteFile) throw new Error(`No se encontró downloads/${item.file} en GitHub.`);
+  }
+
+  downloads.splice(index, 1);
+  state.data.downloads = downloads;
+  state.data.links = Array.isArray(state.data.links) ? state.data.links : [];
+
+  setStatus('Actualizando downloads.json...');
+  await putRepoFile(
+    'downloads.json',
+    textToBase64(`${JSON.stringify(state.data, null, 2)}\n`),
+    `Eliminar descarga: ${item.title}`,
+    state.sha
+  );
+
+  if (removeFile) {
+    setStatus(`Eliminando archivo downloads/${item.file}...`);
+    await deleteRepoFile(
+      `downloads/${item.file}`,
+      `Eliminar archivo: ${item.file}`,
+      remoteFile.sha
+    );
+  }
+
+  await refreshPublishedResources(false);
+  setStatus(removeFile ? 'Descarga y archivo eliminados correctamente.' : 'Entrada de descarga eliminada correctamente.', 'ok');
 }
 
 modeInputs.forEach((input) => input.addEventListener('change', updateMode));
@@ -280,6 +414,62 @@ fileInput.addEventListener('change', () => {
   if (!file) return;
   fileTypeInput.value = fileTypeInput.value || inferFileType(file.name);
   fileSizeInput.value = formatFileSize(file.size);
+});
+
+loadResourcesBtn.addEventListener('click', async () => {
+  loadResourcesBtn.disabled = true;
+  try {
+    await refreshPublishedResources();
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    loadResourcesBtn.disabled = false;
+  }
+});
+
+refreshResourcesBtn.addEventListener('click', async () => {
+  refreshResourcesBtn.disabled = true;
+  try {
+    await refreshPublishedResources();
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    refreshResourcesBtn.disabled = false;
+  }
+});
+
+publishedLinks.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-delete-link]');
+  if (!button) return;
+  button.disabled = true;
+
+  try {
+    await deleteLink(Number(button.dataset.deleteLink));
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+publishedDownloads.addEventListener('click', async (event) => {
+  const entryButton = event.target.closest('[data-delete-download-entry]');
+  const fileButton = event.target.closest('[data-delete-download-file]');
+  const button = entryButton || fileButton;
+  if (!button) return;
+  button.disabled = true;
+
+  try {
+    if (entryButton) {
+      await deleteDownload(Number(entryButton.dataset.deleteDownloadEntry), false);
+    } else {
+      await deleteDownload(Number(fileButton.dataset.deleteDownloadFile), true);
+    }
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
 });
 
 form.addEventListener('submit', async (event) => {
