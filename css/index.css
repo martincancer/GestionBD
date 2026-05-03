@@ -186,6 +186,79 @@ h1 .line2 { display: block; color: var(--blue); }
   background: var(--border);
 }
 
+.search-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 48px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
+}
+
+.search-kicker {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.search-panel label {
+  display: block;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.search-panel p {
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(88,166,255,.28);
+  border-radius: 12px;
+  background: rgba(13,31,54,.5);
+}
+
+.search-box svg {
+  width: 17px;
+  height: 17px;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.search-box input::placeholder {
+  color: var(--text3);
+}
+
+.is-hidden-by-search {
+  display: none !important;
+}
+
 /* portal intro */
 .portal-grid {
   display: grid;
@@ -754,6 +827,10 @@ footer {
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
 @media (max-width: 640px) {
+  .search-panel {
+    grid-template-columns: 1fr;
+  }
+
   .classroom-fab {
     right: 16px;
     bottom: 16px;

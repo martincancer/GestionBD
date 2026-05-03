@@ -49,6 +49,21 @@
 
   <hr class="divider">
 
+  <section class="search-panel" aria-label="Buscador del material">
+    <div>
+      <div class="search-kicker">Buscador</div>
+      <label for="site-search">Encontrá rápido clases, temas y recursos</label>
+      <p id="search-count">Buscá por tema, palabra clave o recurso.</p>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="7" cy="7" r="4"/>
+        <path d="M10 10l4 4"/>
+      </svg>
+      <input id="site-search" type="search" placeholder="Buscar CASE, triggers, subconsultas..." autocomplete="off">
+    </div>
+  </section>
+
   <div class="section-label">Cómo usar este material</div>
 
   <div class="portal-grid">
@@ -335,18 +350,20 @@
             <span class="status-pill status-download">Disponible</span>
           </div>
         </div>
-        <div class="card-title">Descargas de la materia</div>
+        <div class="card-title">Descargas y Links de utilidad</div>
         <div class="card-desc">Repositorio simple para apuntes, PDFs, archivos de práctica y material complementario que se vaya sumando durante la cursada.</div>
         <ul class="topics">
           <li><span class="topic-dot"></span>Archivos disponibles desde la carpeta downloads</li>
           <li><span class="topic-dot"></span>Material útil para clase y práctica</li>
           <li><span class="topic-dot"></span>Entrada genérica para seguir agregando recursos</li>
+          <li><span class="topic-dot"></span>Links de interés relacionados con la materia</li>
         </ul>
         <div class="card-footer">
           <div class="tab-badges">
             <span class="tab-badge">PDF</span>
             <span class="tab-badge">Apuntes</span>
             <span class="tab-badge">Práctica</span>
+            <span class="tab-badge">Links</span>
           </div>
           <button class="open-btn">
             Abrir
@@ -503,5 +520,6 @@
   </a>
 
 </div><!-- /container -->
+<script src="js/index.js"></script>
 </body>
 </html>

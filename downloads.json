@@ -1,0 +1,67 @@
+{
+  "links": [
+    {
+      "title": "W3Schools SQL Tutorial",
+      "category": "Referencia general",
+      "description": "Guia online para repasar sintaxis basica de SQL, consultas, filtros, joins, funciones y ejemplos rapidos.",
+      "url": "https://www.w3schools.com/sql/default.asp",
+      "tags": ["SQL", "Referencia", "Online"]
+    }
+  ],
+  "downloads": [
+    {
+      "title": "Sentencia CASE en SQL",
+      "category": "Apunte de clase",
+      "description": "Material de apoyo sobre el uso de la clausula CASE para resolver logica condicional dentro de consultas SQL.",
+      "type": "PDF",
+      "size": "140 KB",
+      "file": "Sentencia_CASE_en_SQL.pdf",
+      "tags": ["CASE", "SQL"],
+      "resources": [
+        {
+          "label": "Ver video",
+          "url": "https://www.youtube.com/watch?v=UN7IZrKxAHY"
+        }
+      ]
+    },
+    {
+      "title": "SQL SUBCONSULTAS",
+      "category": "Apunte de clase",
+      "description": "Material complementario para practicar subconsultas, consultas anidadas y operadores habituales en SQL Server.",
+      "type": "PDF",
+      "size": "361 KB",
+      "file": "SQL_SUBCONSULTAS.pdf",
+      "tags": ["Subconsultas", "SQL Server"],
+      "resources": [
+        {
+          "label": "Ver video",
+          "url": "https://www.youtube.com/watch?v=H7EAoryo10I&list=PLeA2nB3l8CHV3U7DLALy7EL4WadZDGebH&index=27&pp=iAQB"
+        }
+      ]
+    },
+    {
+      "title": "Triggers en SQL Server",
+      "category": "Apunte de clase",
+      "description": "Material de apoyo sobre el uso de triggers para automatizar acciones en la base de datos.",
+      "type": "PDF",
+      "size": "247 KB",
+      "file": "Triggers_SQL_Server.pdf",
+      "tags": ["Triggers", "SQL Server"],
+      "resources": [
+        {
+          "label": "Ver video",
+          "url": "https://www.youtube.com/watch?v=jLk4BtAKZUM"
+        }
+      ]
+    },
+    {
+      "title": "ScreenREC - Grabacion de Pantalla",
+      "category": "Aplicacion",
+      "description": "Aplicacion ScreenREC para grabar pantallas.",
+      "type": "ZIP",
+      "size": "37.4 MB",
+      "file": "ScreenREC.zip",
+      "tags": ["Aplicacion", "Grabacion"]
+    }
+  ]
+}
