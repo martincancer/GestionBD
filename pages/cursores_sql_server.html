@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursores en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/cursores_sql_server.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 06 · SQL Server</div>
+  <h1>Cursores<br><span>en SQL Server</span></h1>
+  <p class="subtitle">Cómo procesar resultados fila por fila cuando una solución basada en conjuntos no alcanza, entendiendo el ciclo completo del cursor, sus costos y sus usos más razonables.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('usos',1)">🧭 Cuándo usar</button>
+  <button class="nav-btn" onclick="showTab('ciclo',2)">🔁 Ciclo del cursor</button>
+  <button class="nav-btn" onclick="showTab('ejemplos',3)">🛠️ Ejemplos reales</button>
+  <button class="nav-btn" onclick="showTab('costos',4)">⚖️ Ventajas y costos</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>¿Qué son los cursores?</h2>
+  <p class="section-intro">Un cursor es un objeto de SQL Server que permite recorrer el resultado de una consulta <strong>fila por fila</strong>, en lugar de trabajar con el conjunto completo de una sola vez.</p>
+
+  <div class="concepto">
+    SQL está pensado para trabajar por <strong>conjuntos</strong>. Un cursor rompe ese enfoque para resolver lógica <strong>procedural</strong>: recorrer, decidir, actualizar y seguir con la siguiente fila.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('usos',1)">
+      <div class="card-icon">ROW</div>
+      <h3>Fila por fila</h3>
+      <p>Sirve cuando cada fila necesita un tratamiento particular y no alcanza con un único UPDATE o SELECT masivo.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('ciclo',2)">
+      <div class="card-icon">LIFE</div>
+      <h3>Ciclo completo</h3>
+      <p>Todo cursor sigue la misma secuencia: declarar, abrir, obtener filas, procesar, cerrar y liberar.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--operator)" onclick="showTab('ejemplos',3)">
+      <div class="card-icon">SQL</div>
+      <h3>Ejemplos prácticos</h3>
+      <p>La clase incluye tres ejemplos reales: impresión, actualización de totales y acumulados.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('costos',4)">
+      <div class="card-icon">SET</div>
+      <h3>No es la primera opción</h3>
+      <p>Cuando el problema se puede resolver con JOIN, subconsultas o sentencias set-based, eso suele ser mejor.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Qué permite hacer un cursor</h3>
+
+  <ul class="step-list">
+    <li><div class="step-num">1</div><div>Posicionarse sobre filas específicas del resultado.</div></li>
+    <li><div class="step-num">2</div><div>Recuperar una fila o un bloque reducido de filas.</div></li>
+    <li><div class="step-num">3</div><div>Aplicar lógica condicional sobre la fila actual.</div></li>
+    <li><div class="step-num">4</div><div>Controlar el procesamiento en escenarios donde la secuencia importa.</div></li>
+  </ul>
+</div>
+
+<div class="section" id="tab-usos">
+  <h2>¿En qué casos se pueden usar?</h2>
+  <p class="section-intro">Los cursores no son “malos” por definición. Tienen sentido cuando realmente necesitás lógica iterativa y el enfoque por conjuntos no resuelve el problema con claridad.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">Usos recomendados</div>
+      <div class="compare-body">
+        <ul>
+          <li>Scripts de mantenimiento o administración.</li>
+          <li>Procesos complejos con decisiones por fila.</li>
+          <li>Migraciones o transformaciones secuenciales.</li>
+          <li>Escenarios donde la lógica iterativa es el foco del problema.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card bad">
+      <div class="compare-header">Evitar en</div>
+      <div class="compare-body">
+        <ul>
+          <li>Operaciones transaccionales de alto volumen.</li>
+          <li>Consultas frecuentes en producción.</li>
+          <li>Escenarios que se resuelven con JOIN o subconsultas.</li>
+          <li>Procesos donde una sola sentencia puede hacer el trabajo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip warning">
+    <div class="tip-icon">!</div>
+    <div>La regla práctica es simple: <strong>si se puede resolver con una sentencia basada en conjuntos, preferila</strong>. El cursor queda como recurso cuando la lógica por fila es realmente necesaria.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-ciclo">
+  <h2>Ciclo de vida de un cursor</h2>
+  <p class="section-intro">Todo cursor en SQL Server repite la misma secuencia. Entender ese ciclo te ayuda a leer y escribir cursores sin perderte en la sintaxis.</p>
+
+  <div class="flow-strip">
+    <div class="flow-step">DECLARE</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">OPEN</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">FETCH</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">WHILE @@FETCH_STATUS</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">CLOSE / DEALLOCATE</div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">esqueleto_cursor.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="comment">-- 1. Declarar el cursor</span>
+<span class="kw">DECLARE</span> <span class="id">NombreCursor</span> <span class="kw">CURSOR FOR</span>
+<span class="kw">SELECT</span> Columna1, Columna2
+<span class="kw">FROM</span> Tabla
+<span class="kw">WHERE</span> Condicion;
+
+<span class="comment">-- 2. Variables de apoyo</span>
+<span class="kw">DECLARE</span> <span class="id">@Variable1</span> <span class="type">INT</span>, <span class="id">@Variable2</span> <span class="type">VARCHAR</span>(<span class="num">100</span>);
+
+<span class="comment">-- 3. Abrir</span>
+<span class="kw">OPEN</span> <span class="id">NombreCursor</span>;
+
+<span class="comment">-- 4. Obtener la primera fila</span>
+<span class="kw">FETCH NEXT FROM</span> <span class="id">NombreCursor</span> <span class="kw">INTO</span> <span class="id">@Variable1</span>, <span class="id">@Variable2</span>;
+
+<span class="comment">-- 5. Procesar mientras haya filas</span>
+<span class="kw">WHILE</span> <span class="id">@@FETCH_STATUS</span> = <span class="num">0</span>
+<span class="kw">BEGIN</span>
+    <span class="comment">-- Lógica aquí</span>
+
+    <span class="kw">FETCH NEXT FROM</span> <span class="id">NombreCursor</span> <span class="kw">INTO</span> <span class="id">@Variable1</span>, <span class="id">@Variable2</span>;
+<span class="kw">END</span>;
+
+<span class="comment">-- 6. Cerrar y liberar</span>
+<span class="kw">CLOSE</span> <span class="id">NombreCursor</span>;
+<span class="kw">DEALLOCATE</span> <span class="id">NombreCursor</span>;</pre>
+  </div>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Instrucción</th>
+        <th>Función</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DECLARE CURSOR</td>
+        <td>Define qué consulta va a recorrer el cursor.</td>
+      </tr>
+      <tr>
+        <td>OPEN</td>
+        <td>Inicializa el cursor y deja listo el conjunto de resultados.</td>
+      </tr>
+      <tr>
+        <td>FETCH NEXT</td>
+        <td>Trae la fila actual a variables escalares.</td>
+      </tr>
+      <tr>
+        <td>@@FETCH_STATUS</td>
+        <td>Indica si el último FETCH fue exitoso.</td>
+      </tr>
+      <tr>
+        <td>CLOSE / DEALLOCATE</td>
+        <td>Cierra el cursor y libera los recursos asociados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="tab-ejemplos">
+  <h2>Ejemplos reales del archivo SQL</h2>
+  <p class="section-intro">Tomé los ejemplos que dejaste en <code>Ejemplos CURSORES.sql</code> para que la clase muestre cursores con usos concretos y no solo el esqueleto teórico.</p>
+
+  <div class="tip success">
+    <div class="tip-icon">✓</div>
+    <div>Además de estar embebidos en la clase, los ejemplos quedaron disponibles para descargar como archivo <code>.sql</code> desde la sección de materiales.</div>
+  </div>
+
+  <div class="demo-block">
+    <h3>1. Recorrer empleados e imprimir cada fila</h3>
+    <p class="section-intro">Este ejemplo usa el cursor como herramienta de lectura secuencial: toma cada empleado y lo imprime con <code>PRINT CONCAT</code>.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">cursor_empleados.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">DECLARE</span> DemoCursor <span class="kw">CURSOR FOR</span>
+<span class="kw">SELECT</span> Legajo, Apellido, Nombre, Sueldo <span class="kw">FROM</span> Empleados
+
+<span class="kw">DECLARE</span> @legajo <span class="type">INT</span>, @apellido <span class="type">VARCHAR</span>(<span class="num">50</span>), @nombre <span class="type">VARCHAR</span>(<span class="num">50</span>), @sueldo <span class="type">NUMERIC</span>(<span class="num">18</span>,<span class="num">2</span>)
+
+<span class="kw">OPEN</span> DemoCursor;
+<span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @legajo, @apellido, @nombre, @sueldo;
+
+<span class="kw">WHILE</span> @@FETCH_STATUS = <span class="num">0</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">PRINT</span> <span class="fn">CONCAT</span>(@legajo, <span class="str">'- '</span>, @apellido, <span class="str">', '</span>, @nombre, <span class="str">' - '</span>, @sueldo)
+    <span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @legajo, @apellido, @nombre, @sueldo
+<span class="kw">END</span>;
+
+<span class="kw">CLOSE</span> DemoCursor;
+<span class="kw">DEALLOCATE</span> DemoCursor;</pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>2. Actualizar el total de cada venta</h3>
+    <p class="section-intro">Acá el cursor recorre una consulta agrupada y usa cada fila calculada para impactar otra tabla con <code>UPDATE</code>.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">cursor_totales.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">DECLARE</span> DemoCursor <span class="kw">CURSOR FOR</span>
+<span class="kw">SELECT</span> VentaID, <span class="fn">SUM</span>(Cantidad * Precio)
+<span class="kw">FROM</span> VentasProductos
+<span class="kw">GROUP BY</span> VentaID
+
+<span class="kw">DECLARE</span> @ventaid <span class="type">INT</span>, @total <span class="type">NUMERIC</span>(<span class="num">18</span>,<span class="num">2</span>);
+
+<span class="kw">OPEN</span> DemoCursor;
+<span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @ventaid, @total;
+
+<span class="kw">WHILE</span> @@FETCH_STATUS = <span class="num">0</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">UPDATE</span> Ventas <span class="kw">SET</span> Total = @total <span class="kw">WHERE</span> VentaID = @ventaid
+    <span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @ventaid, @total;
+<span class="kw">END</span>;
+
+<span class="kw">CLOSE</span> DemoCursor;
+<span class="kw">DEALLOCATE</span> DemoCursor;</pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>3. Calcular un acumulado cronológico</h3>
+    <p class="section-intro">Este caso muestra un uso típico donde la secuencia importa: recorrer ventas por fecha e ir acumulando el total fila por fila.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">cursor_acumulado.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">DECLARE</span> DemoCursor <span class="kw">CURSOR FOR</span>
+<span class="kw">SELECT</span> VentaID, Fecha, Total
+<span class="kw">FROM</span> Ventas
+<span class="kw">WHERE</span> Fecha &gt;= <span class="str">'2023-01-01'</span> <span class="kw">AND</span> Fecha &lt; <span class="str">'2023-12-31'</span>
+<span class="kw">ORDER BY</span> Fecha
+
+<span class="kw">DECLARE</span> @ventaid <span class="type">INT</span>, @fecha <span class="type">DATE</span>, @total <span class="type">NUMERIC</span>(<span class="num">18</span>,<span class="num">2</span>), @acumulado <span class="type">NUMERIC</span>(<span class="num">18</span>,<span class="num">2</span>) = <span class="num">0</span>;
+
+<span class="kw">OPEN</span> DemoCursor;
+<span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @ventaid, @fecha, @total;
+
+<span class="kw">WHILE</span> @@FETCH_STATUS = <span class="num">0</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">SET</span> @acumulado = @acumulado + @total
+    <span class="kw">SELECT</span> @ventaid <span class="kw">AS</span> VentaID, @fecha <span class="kw">AS</span> Fecha, @total <span class="kw">AS</span> Total, @acumulado <span class="kw">AS</span> Acumulado
+    <span class="kw">FETCH NEXT FROM</span> DemoCursor <span class="kw">INTO</span> @ventaid, @fecha, @total
+<span class="kw">END</span>;
+
+<span class="kw">CLOSE</span> DemoCursor;
+<span class="kw">DEALLOCATE</span> DemoCursor;</pre>
+    </div>
+  </div>
+
+  <p class="section-intro">Archivo completo: <a class="inline-link" href="../downloads/Ejemplos_CURSORES.sql" download>descargar Ejemplos_CURSORES.sql</a></p>
+</div>
+
+<div class="section" id="tab-costos">
+  <h2>Ventajas y desventajas</h2>
+  <p class="section-intro">El cursor puede resolver problemas reales, pero tiene un costo. Conviene entender qué gana y qué sacrifica frente a una solución set-based.</p>
+
+  <div class="summary-grid">
+    <div class="summary-card positive">
+      <div class="summary-label">Ventajas</div>
+      <ul>
+        <li>Facilita la lógica compleja fila por fila.</li>
+        <li>Permite decisiones condicionales durante el recorrido.</li>
+        <li>Es útil para scripts administrativos o procesos secuenciales.</li>
+      </ul>
+    </div>
+    <div class="summary-card negative">
+      <div class="summary-label">Desventajas</div>
+      <ul>
+        <li>Consume más recursos que una solución por conjuntos.</li>
+        <li>Puede ser mucho más lento en grandes volúmenes.</li>
+        <li>Complejiza el mantenimiento si se usa donde no hace falta.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>Una buena práctica docente es mostrar primero la solución basada en conjuntos y dejar el cursor como alternativa cuando la lógica iterativa sea realmente el foco del problema.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-quiz">
+  <h2>Quiz sobre cursores</h2>
+  <p class="section-intro">Un repaso corto para verificar que te quedó clara la diferencia entre cursores, enfoque por conjuntos y el ciclo de vida básico de un cursor.</p>
+
+  <div id="quiz-container"></div>
+
+  <div class="quiz-score" id="quiz-score" style="display:none;">
+    <div class="score-num" id="score-val">0/0</div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Reintentar quiz</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Cursores en SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/cursores_sql_server.js"></script>
+</body>
+</html>

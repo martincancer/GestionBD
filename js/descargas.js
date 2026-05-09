@@ -40,6 +40,15 @@ const fallbackDownloadsData = {
       resources: [{ label: 'Ver video', url: 'https://www.youtube.com/watch?v=jLk4BtAKZUM' }]
     },
     {
+      title: 'Ejemplos de cursores en SQL Server',
+      category: 'Ejemplos de clase',
+      description: 'Archivo SQL con ejemplos de cursores para recorrer filas, actualizar totales y calcular acumulados.',
+      type: 'SQL',
+      size: '1.8 KB',
+      file: 'Ejemplos_CURSORES.sql',
+      tags: ['Cursores', 'SQL Server', 'Practica']
+    },
+    {
       title: 'ScreenREC - Grabacion de Pantalla',
       category: 'Aplicacion',
       description: 'Aplicacion ScreenREC para grabar pantallas.',
