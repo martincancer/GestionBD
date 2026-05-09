@@ -10,16 +10,6 @@
         "Referencia",
         "Online"
       ]
-    },
-    {
-      "title": "SQL Bolt",
-      "category": "Link",
-      "description": "Sitio SQL Bolt, para aprender o repasar SQL",
-      "url": "https://sqlbolt.com",
-      "tags": [
-        "SQL",
-        "Referencia"
-      ]
     }
   ],
   "downloads": [
