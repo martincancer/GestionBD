@@ -30,6 +30,9 @@
   --purple-bg: #1c1040;
   --amber: #d29922;
   --amber-bg: #2b1d0e;
+  --red: #ff5f56;
+  --red2: #da3633;
+  --red-bg: #2d1010;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -466,6 +469,10 @@ h1 .line2 { display: block; color: var(--blue); }
   border-color: var(--amber);
   box-shadow: 0 16px 40px rgba(210,153,34,.12);
 }
+.lesson-card.red:hover  {
+  border-color: var(--red);
+  box-shadow: 0 16px 40px rgba(218,54,51,.14);
+}
 
 /* top color bar */
 .card-bar {
@@ -481,6 +488,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .lesson-card.coral .card-bar { background: linear-gradient(90deg, var(--coral2), var(--coral)); }
 .purple .card-bar { background: linear-gradient(90deg, #6e40c9, var(--purple)); }
 .amber  .card-bar { background: linear-gradient(90deg, #9e6a03, var(--amber)); }
+.red    .card-bar { background: linear-gradient(90deg, var(--red2), var(--red)); }
 
 .card-inner { padding: 28px; flex: 1; display: flex; flex-direction: column; }
 
@@ -523,6 +531,7 @@ h1 .line2 { display: block; color: var(--blue); }
 }
 .purple .card-icon { background: var(--purple-bg);  color: var(--purple); border: 1px solid rgba(188,140,255,.2); }
 .amber .card-icon { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(210,153,34,.24); }
+.red .card-icon { background: var(--red-bg); color: var(--red); border: 1px solid rgba(255,95,86,.24); }
 
 .card-num {
   font-family: 'JetBrains Mono', monospace;
@@ -554,6 +563,12 @@ h1 .line2 { display: block; color: var(--blue); }
   color: var(--amber);
   border-color: rgba(210,153,34,.28);
   background: rgba(210,153,34,.09);
+}
+
+.status-video {
+  color: var(--red);
+  border-color: rgba(255,95,86,.28);
+  background: rgba(255,95,86,.09);
 }
 
 .card-title {
@@ -605,6 +620,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .lesson-card.coral .topic-dot { background: var(--coral); }
 .purple .topic-dot { background: var(--purple); }
 .amber .topic-dot { background: var(--amber); }
+.red .topic-dot { background: var(--red); }
 
 /* tabs count badges */
 .card-footer {
@@ -653,6 +669,7 @@ h1 .line2 { display: block; color: var(--blue); }
 .lesson-card.coral .open-btn { color: var(--coral); }
 .purple .open-btn { color: var(--purple); }
 .amber .open-btn { color: var(--amber); }
+.red .open-btn { color: var(--red); }
 
 .lesson-card:hover .open-btn { gap: 10px; }
 
