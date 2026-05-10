@@ -91,6 +91,19 @@
         "Aplicacion",
         "Grabacion"
       ]
+    },
+    {
+      "title": "SQL Cursores",
+      "category": "Apunto de clase",
+      "description": "Explicación sobre cursores en SQL Server, su uso y funcionalidad.",
+      "type": "PDF",
+      "size": "232 KB",
+      "file": "Cursores_SQL_Server.pdf",
+      "tags": [
+        "SQL",
+        "Cursor",
+        "Procedimiento"
+      ]
     }
   ]
 }
