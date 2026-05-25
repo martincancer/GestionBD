@@ -104,6 +104,20 @@
         "Cursor",
         "Procedimiento"
       ]
+    },
+    {
+      "title": "Repaso Parcial",
+      "category": "Ejercicios",
+      "description": "Ejercicios de repaso para 1er parcial",
+      "type": "SQL",
+      "size": "1.4 KB",
+      "file": "Repaso_Parcial.sql",
+      "tags": [
+        "SQL",
+        "Case",
+        "Subconsultas",
+        "Triggers"
+      ]
     }
   ]
 }
