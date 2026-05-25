@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primera Evaluacion - Solucion</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/primera_evaluacion_solucion.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al indice</a>
+  </div>
+  <div class="badge">Evaluacion 01 · SQL Server</div>
+  <h1>Primera Evaluacion<br><span>Solución</span></h1>
+  <p class="subtitle">Resolución guiada de la primera evaluacion: consultas con agregacion, CASE, subconsultas y triggers aplicados a ventas, productos y empleados.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">Introduccion</button>
+  <button class="nav-btn" onclick="showTab('envio',1)">Costo de envio</button>
+  <button class="nav-btn" onclick="showTab('consultas',2)">Subconsultas</button>
+  <button class="nav-btn" onclick="showTab('stock',3)">Trigger stock</button>
+  <button class="nav-btn" onclick="showTab('legajo',4)">Trigger legajo</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>Contenido</h2>
+  <p class="section-intro">Esta sección muestra la resolución de la primera evaluación. Cada ejercicio esta presentado con su consigna, la idea tecnica que resuelve el problema y el script final.</p>
+
+  <div class="concepto">
+    El foco de cada evaluación esta en leer bien la consigna antes de escribir SQL: identificar tablas, relaciones, filtros, agrupaciones y reglas de negocio. En los triggers, la clave es entender cuando usar <code>deleted</code>, <code>inserted</code>, <code>AFTER</code> o <code>INSTEAD OF</code>.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('envio',1)">
+      <div class="card-icon">CASE</div>
+      <h3>Agregacion y clasificacion</h3>
+      <p>Peso total por venta y costo de envio calculado con <code>CASE</code>.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--blue)" onclick="showTab('consultas',2)">
+      <div class="card-icon">SUB</div>
+      <h3>Subconsultas</h3>
+      <p>Comparacion contra promedio y conteo correlacionado por empleado.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('stock',3)">
+      <div class="card-icon">DEL</div>
+      <h3>Trigger de stock</h3>
+      <p>Recuperacion de stock cuando se elimina un detalle de venta.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--operator)" onclick="showTab('legajo',4)">
+      <div class="card-icon">INS</div>
+      <h3>Validacion de legajo</h3>
+      <p>Dos alternativas para bloquear legajos repetidos en empleados.</p>
+    </div>
+  </div>
+
+  <h3>Mapa rapido</h3>
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Ejercicio</th>
+        <th>Tema principal</th>
+        <th>Recursos usados</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Costo de envio por venta</td>
+        <td>JOIN, SUM, GROUP BY, CASE</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Productos nacionales contra promedio importado</td>
+        <td>Subconsulta escalar, AVG</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Ventas por vendedor</td>
+        <td>Subconsulta correlacionada, COUNT</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Stock al eliminar detalle</td>
+        <td>Trigger AFTER DELETE, tabla deleted</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Control de legajo duplicado</td>
+        <td>Trigger AFTER INSERT e INSTEAD OF INSERT</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="tab-envio">
+  <h2>Ejercicio 1: costo de envio</h2>
+  <div class="consigna-box">
+    <div class="consigna-label">Consigna</div>
+    <p>Redactar una consulta que retorne, para todas las ventas realizadas en el año 2023:</p>
+    <p>El peso total de los productos vendidos en cada venta (resultado de Cantidad * Peso del producto, sumado por venta), el total de la venta, la razón social del cliente y clasificar agregando una nueva columna, llamada CostoDeEnvio, según lo siguiente:</p>
+    <ul>
+      <li>Hasta 10 kg : 0</li>
+      <li>Más de 10 kg hasta 50 kg : 1.000</li>
+      <li>Más de 50 kg hasta 100 kg : 5.000</li>
+      <li>Más de 100 kg hasta 200 kg : 10.000</li>
+      <li>Más de 200 kg : 15.000</li>
+    </ul>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-header">Datos necesarios</div>
+      <div class="compare-body">
+        <ul class="step-list compact">
+          <li><div class="step-num">1</div><div><code>Ventas</code> aporta fecha, total y cliente.</div></li>
+          <li><div class="step-num">2</div><div><code>Clientes</code> aporta la razon social.</div></li>
+          <li><div class="step-num">3</div><div><code>VentasProductos</code> y <code>Productos</code> permiten calcular el peso.</div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Regla de negocio</div>
+      <div class="compare-body">
+        <p>El peso total se calcula como <code>SUM(vp.Cantidad * p.Peso)</code>. Luego se clasifica con <code>CASE</code> para asignar el costo de envio segun el rango de kilogramos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">ejercicio_01_costo_envio.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><code>SELECT
+    v.VentaID,
+    v.Total,
+    c.RazonSocial,
+    SUM(vp.Cantidad * p.Peso) AS PesoTotal,
+    CASE
+        WHEN SUM(vp.Cantidad * p.Peso) &lt;= 10 THEN 0
+        WHEN SUM(vp.Cantidad * p.Peso) &gt; 10 AND SUM(vp.Cantidad * p.Peso) &lt;= 50 THEN 1000
+        WHEN SUM(vp.Cantidad * p.Peso) &gt; 50 AND SUM(vp.Cantidad * p.Peso) &lt;= 100 THEN 5000
+        WHEN SUM(vp.Cantidad * p.Peso) &gt; 100 AND SUM(vp.Cantidad * p.Peso) &lt;= 200 THEN 10000
+        ELSE 15000
+    END AS CostoDeEnvio
+FROM VentasProductos vp
+INNER JOIN Ventas v ON vp.VentaID = v.VentaID
+INNER JOIN Clientes c ON v.ClienteID = c.ClienteID
+INNER JOIN Productos p ON vp.ProductoID = p.ProductoID
+WHERE v.Fecha BETWEEN '20230101' AND '20231231'
+GROUP BY
+    v.VentaID,
+    v.Total,
+    c.RazonSocial
+GO</code></pre>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>Como se usa <code>SUM</code>, las columnas no agregadas del <code>SELECT</code> deben aparecer en el <code>GROUP BY</code>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-consultas">
+  <h2>Ejercicios 2 y 3: subconsultas</h2>
+  <p class="section-intro">Estos dos puntos trabajan subconsultas con objetivos distintos: una compara contra un valor promedio global y la otra cuenta ventas por cada empleado del listado externo.</p>
+
+  <div class="demo-block">
+    <h3>2. Productos nacionales con precio mayor al promedio importado</h3>
+    <div class="consigna-box">
+      <div class="consigna-label">Consigna</div>
+      <p>Redactar una consulta que devuelva el listado de productos nacionales cuyo precio sea mayor al precio promedio de todos los productos importados.</p>
+      <p>La consulta debe mostrar los siguientes campos:</p>
+      <ul>
+        <li>Código del producto (Codigo),</li>
+        <li>Nombre del producto (Nombre),</li>
+        <li>Nombre de la marca (Marca),</li>
+        <li>Precio del producto (Precio)</li>
+      </ul>
+    </div>
+    <p class="section-text">La subconsulta devuelve un unico valor: el precio promedio de todos los productos importados. La consulta principal filtra los productos nacionales que superan ese promedio.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejercicio_02_promedio_importados.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code>SELECT
+    p.Codigo,
+    p.Nombre,
+    m.Marca,
+    p.Precio
+FROM Productos p
+INNER JOIN Marcas m ON p.MarcaID = m.MarcaID
+WHERE p.Origen = 'N'
+  AND p.Precio &gt; (
+      SELECT AVG(Precio)
+      FROM Productos
+      WHERE Origen = 'I'
+  )
+GO</code></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>3. Cantidad de ventas por vendedor</h3>
+    <div class="consigna-box">
+      <div class="consigna-label">Consigna</div>
+      <p>Redactar una consulta que devuelva un listado de todos los empleados que ocupan el puesto de vendedor (PuestoID = 3), junto con la cantidad de ventas que realizaron. Utilizar una subconsulta correlacionada para contar las ventas de cada empleado vendedor.</p>
+      <p>Se deben mostrar los siguientes campos:</p>
+      <ul>
+        <li>Apellido del empleado (Apellido)</li>
+        <li>Nombre del empleado (Nombre)</li>
+        <li>Cantidad total de ventas realizadas (Cantidad)</li>
+      </ul>
+    </div>
+    <p class="section-text">La subconsulta es correlacionada porque depende del empleado actual de la consulta externa mediante <code>v.EmpleadoID = e.EmpleadoID</code>.</p>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejercicio_03_ventas_por_vendedor.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code>SELECT
+    e.Apellido,
+    e.Nombre,
+    (
+        SELECT COUNT(*)
+        FROM Ventas v
+        WHERE v.EmpleadoID = e.EmpleadoID
+    ) AS Cantidad
+FROM Empleados e
+WHERE e.PuestoID = 3
+GO</code></pre>
+    </div>
+  </div>
+
+  <div class="tip success">
+    <div class="tip-icon">+</div>
+    <div>La diferencia central: en el ejercicio 2 la subconsulta puede resolverse una vez; en el ejercicio 3 se evalua vinculada a cada empleado de la consulta externa.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-stock">
+  <h2>Ejercicio 4: trigger para recuperar stock</h2>
+  <div class="consigna-box">
+    <div class="consigna-label">Consigna</div>
+    <p>Crear un trigger sobre la tabla VentasProductos para la acción de eliminación que realice lo siguiente: si se borra un registro de la tabla VentasProductos, se debe actualizar el stock del producto correspondiente, sumando el valor de la columna cantidad del registro eliminado al stock del producto.</p>
+  </div>
+
+  <div class="concepto">
+    En un trigger de eliminacion, la tabla virtual <code>deleted</code> contiene las filas que fueron borradas. Por eso se puede sumar <code>d.Cantidad</code> al stock del producto correspondiente.
+  </div>
+
+  <div class="flow-strip">
+    <div class="flow-step">DELETE en VentasProductos</div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step">deleted guarda la fila eliminada</div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step">Productos recupera stock</div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">ejercicio_04_trigger_stock.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><code>CREATE TRIGGER TR_DelVentasProducto_Stock
+ON VentasProductos
+AFTER DELETE
+AS
+BEGIN
+    UPDATE p
+    SET p.Stock = p.Stock + d.Cantidad
+    FROM Productos p
+    INNER JOIN deleted d ON p.ProductoID = d.ProductoID
+END
+GO</code></pre>
+  </div>
+
+  <div class="tip warn">
+    <div class="tip-icon">!</div>
+    <div>El trigger esta escrito para trabajar tambien si se eliminan varias filas en una misma operacion, porque usa un <code>UPDATE</code> con <code>JOIN</code> contra <code>deleted</code>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-legajo">
+  <h2>Ejercicio 5: validar legajo duplicado</h2>
+  <div class="consigna-box">
+    <div class="consigna-label">Consigna</div>
+    <p>Crear un trigger para la acción de inserción en la tabla Empleados que verifique si existe el número de legajo indicado no permita la carga del empleado.</p>
+  </div>
+  <p class="section-intro">La solucion muestra dos enfoques posibles: <code>AFTER INSERT</code> y <code>INSTEAD OF INSERT</code>.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">AFTER INSERT</div>
+      <div class="compare-body">
+        <p>La insercion ocurre primero. Si el trigger detecta duplicado, informa el error y ejecuta <code>ROLLBACK TRANSACTION</code>.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">INSTEAD OF INSERT</div>
+      <div class="compare-body">
+        <p>El trigger reemplaza la insercion original. Si no hay duplicado, inserta explicitamente las filas recibidas en <code>inserted</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>Opcion con AFTER</h3>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejercicio_05_legajo_after.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code>CREATE TRIGGER TR_InsEmpleados_Legajo
+ON Empleados
+AFTER INSERT
+AS
+BEGIN
+    IF (
+        SELECT COUNT(*)
+        FROM Empleados e
+        INNER JOIN inserted i ON e.Legajo = i.Legajo
+    ) &gt; 1
+    BEGIN
+        RAISERROR('El numero de legajo ya existe. No se puede insertar el empleado.', 16, 1)
+        ROLLBACK TRANSACTION
+    END
+END
+GO</code></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>Opcion con INSTEAD OF</h3>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejercicio_05_legajo_instead_of.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code>CREATE TRIGGER TR_InsEmpleados_Legajo
+ON Empleados
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF (
+        SELECT COUNT(*)
+        FROM Empleados e
+        INNER JOIN inserted i ON e.Legajo = i.Legajo
+    ) &gt; 0
+    BEGIN
+        RAISERROR('El numero de legajo ya existe. No se puede insertar el empleado.', 16, 1)
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Empleados
+        SELECT
+            Legajo,
+            Apellido,
+            Nombre,
+            NroDoc,
+            Cuil,
+            Sexo,
+            Domicilio,
+            CiudadID,
+            TelPers,
+            EmailLab,
+            EmailPers,
+            FechaNac,
+            FechaIngreso,
+            Comision,
+            Sueldo,
+            JefeID,
+            PuestoID,
+            HorasJornada,
+            FechaBaja,
+            EsActivo
+        FROM inserted
+    END
+END
+GO</code></pre>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>En una base real conviene reforzar esta regla con una restriccion <code>UNIQUE</code> sobre <code>Legajo</code>, para que la integridad no dependa solo del trigger.</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Primera Evaluacion - Solucion · Tecnicatura Superior en Analisis, Desarrollo y Programacion de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formacion Docente y Tecnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/primera_evaluacion_solucion.js"></script>
+</body>
+</html>
