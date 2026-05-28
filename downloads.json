@@ -118,6 +118,20 @@
         "Subconsultas",
         "Triggers"
       ]
+    },
+    {
+      "title": "Evaluación 1 Resuelta",
+      "category": "Evaluación",
+      "description": "Archivo con ejercicios resueltos de la evaluación nro. 1",
+      "type": "SQL",
+      "size": "4.0 KB",
+      "file": "Evaluacion_Resuelta.sql",
+      "tags": [
+        "SQL",
+        "Case",
+        "Subconsultas",
+        "Triggers"
+      ]
     }
   ]
 }
