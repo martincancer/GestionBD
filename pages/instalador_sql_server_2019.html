@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instalación de SQL Server 2019</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/cursores_sql_server.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 07 · SQL Server</div>
+  <h1>Instalación de<br><span>SQL Server 2019</span></h1>
+  <p class="subtitle">Guía paso a paso para instalar SQL Server 2019, elegir edición, configurar la instancia, habilitar el motor de base de datos y revisar las pantallas más importantes del instalador.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Inicio</button>
+  <button class="nav-btn" onclick="showTab('edicion',1)">🔑 Edición</button>
+  <button class="nav-btn" onclick="showTab('reglas',2)">✅ Reglas</button>
+  <button class="nav-btn" onclick="showTab('features',3)">🧩 Componentes</button>
+  <button class="nav-btn" onclick="showTab('configuracion',4)">⚙️ Configuración</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>SQL Server Installation Center</h2>
+  <p class="section-intro">Al ejecutar el instalador de Microsoft SQL Server 2019 se abre el centro de instalación. Desde esa ventana se accede a las opciones de planificación, instalación, mantenimiento, herramientas y recursos.</p>
+
+  <div class="concepto">
+    Para una instalación nueva en la computadora se ingresa en <strong>Installation</strong> y se elige <strong>New SQL Server stand-alone installation</strong>. En español suele aparecer como <strong>Nueva instalación independiente</strong>.
+  </div>
+
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/installation-center.png" alt="Pantalla SQL Server Installation Center con la sección Installation seleccionada">
+    <figcaption>SQL Server Installation Center: desde la sección Installation se inicia una instalación nueva.</figcaption>
+  </figure>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('edicion',1)">
+      <div class="card-icon">KEY</div>
+      <h3>Edición</h3>
+      <p>Elegí Express, Developer, Standard o Enterprise según el uso.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('reglas',2)">
+      <div class="card-icon">OK</div>
+      <h3>Verificaciones</h3>
+      <p>Licencia, actualizaciones y reglas previas de instalación.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--operator)" onclick="showTab('features',3)">
+      <div class="card-icon">DB</div>
+      <h3>Componentes</h3>
+      <p>El motor de base de datos es obligatorio para trabajar con SQL Server.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('configuracion',4)">
+      <div class="card-icon">CFG</div>
+      <h3>Configuración</h3>
+      <p>Instancia, servicios, autenticación, usuarios y carpetas.</p>
+    </div>
+  </div>
+
+  <hr>
+  <h3>Recorrido general</h3>
+  <div class="flow-strip">
+    <div class="flow-step">Abrir Installation Center</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Elegir edición</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Seleccionar componentes</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Configurar instancia y motor</div>
+  </div>
+</div>
+
+<div class="section" id="tab-edicion">
+  <h2>Product Key y edición</h2>
+  <p class="section-intro">En esta pantalla se selecciona la edición de SQL Server que se desea instalar. La elección depende de si se usará para aprender, practicar, probar sistemas o trabajar en producción.</p>
+
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/product-key-edition.png" alt="Pantalla Product Key del instalador de SQL Server 2019">
+    <figcaption>Product Key: selección de edición antes de continuar con la instalación.</figcaption>
+  </figure>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-header">Express</div>
+      <div class="compare-body">
+        <p>Es gratuita y limitada. Sirve para prácticas simples o sistemas pequeños.</p>
+      </div>
+    </div>
+    <div class="compare-card good">
+      <div class="compare-header">Developer</div>
+      <div class="compare-body">
+        <p>Es gratuita e incluye prácticamente todas las funciones de Enterprise. Es la recomendada para aprendizaje, cursos, programación y pruebas.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Standard</div>
+      <div class="compare-body">
+        <p>Es una versión comercial orientada a empresas con necesidades habituales de producción.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Enterprise</div>
+      <div class="compare-body">
+        <p>Es la edición más completa, pensada para grandes empresas y escenarios avanzados.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip success">
+    <div class="tip-icon">✓</div>
+    <div>Para aprender o practicar conviene instalar <strong>SQL Server Developer Edition</strong>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-reglas">
+  <h2>Licencia, actualizaciones y reglas</h2>
+  <p class="section-intro">Antes de copiar archivos, el instalador pide aceptar términos, ofrece buscar actualizaciones y ejecuta controles automáticos sobre el equipo.</p>
+
+  <div class="figure-grid">
+    <figure class="lesson-figure">
+      <img src="../images/sql_server_2019_instalacion/license-terms.png" alt="Pantalla License Terms con la opción para aceptar los términos de licencia">
+      <figcaption>License Terms: aceptar los términos para habilitar el avance.</figcaption>
+    </figure>
+    <figure class="lesson-figure">
+      <img src="../images/sql_server_2019_instalacion/microsoft-update.png" alt="Pantalla Microsoft Update del instalador de SQL Server">
+      <figcaption>Microsoft Update: opción para incluir actualizaciones del producto.</figcaption>
+    </figure>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card positive">
+      <div class="summary-label">License Terms</div>
+      <ul>
+        <li>Marcar <strong>I accept the license terms</strong>.</li>
+        <li>Luego avanzar con <strong>Next</strong>.</li>
+      </ul>
+    </div>
+    <div class="summary-card neutral">
+      <div class="summary-label">Microsoft Update</div>
+      <ul>
+        <li>Activar <strong>Include SQL Server product updates</strong>.</li>
+        <li>Ayuda a instalar correcciones, parches y mejoras de estabilidad.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Install Rules</h3>
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/install-rules.png" alt="Pantalla Install Rules con verificaciones del instalador">
+    <figcaption>Install Rules: el instalador revisa requisitos y posibles advertencias antes de continuar.</figcaption>
+  </figure>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Control</th>
+        <th>Qué revisa</th>
+        <th>Comentario</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Memoria y sistema</td>
+        <td>RAM, versión de Windows y compatibilidad</td>
+        <td>Debe cumplir los requisitos mínimos.</td>
+      </tr>
+      <tr>
+        <td>Permisos</td>
+        <td>Privilegios necesarios para instalar servicios</td>
+        <td>Conviene ejecutar como administrador.</td>
+      </tr>
+      <tr>
+        <td>Firewall warning</td>
+        <td>Estado del firewall de Windows</td>
+        <td>No suele impedir la instalación.</td>
+      </tr>
+      <tr>
+        <td>Restart required</td>
+        <td>Reinicio pendiente de Windows</td>
+        <td>Puede pedir reiniciar antes de continuar.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="tab-features">
+  <h2>Feature Selection</h2>
+  <p class="section-intro">Esta es una de las pantallas más importantes: define qué componentes se instalarán junto con SQL Server.</p>
+
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/feature-selection.png" alt="Pantalla Feature Selection con componentes disponibles para instalar">
+    <figcaption>Feature Selection: selección de componentes, incluido Database Engine Services.</figcaption>
+  </figure>
+
+  <div class="compare-grid single-column">
+    <div class="compare-card good">
+      <div class="compare-header">Database Engine Services</div>
+      <div class="compare-body">
+        <p>Es el motor principal de bases de datos. Es obligatorio: sin este componente SQL Server no funciona como servidor de bases de datos.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">SQL Server Replication</div>
+      <div class="compare-body">
+        <p>Permite replicar datos entre servidores. Normalmente no es necesario para principiantes.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Full-Text Search</div>
+      <div class="compare-body">
+        <p>Permite búsquedas avanzadas dentro de textos, por ejemplo buscar palabras en descripciones largas. Es recomendable activarlo.</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Machine Learning Services</div>
+      <div class="compare-body">
+        <p>Permite usar Python o R dentro de SQL Server. No es necesario para comenzar.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>Para una instalación inicial se pueden dejar los directorios por defecto. En servidores empresariales suele separarse datos, logs, backups y TempDB en discos distintos.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-configuracion">
+  <h2>Instancia, servicios y motor</h2>
+  <p class="section-intro">Después de elegir componentes, el instalador pide configurar la instancia, los servicios de Windows y el motor de base de datos.</p>
+
+  <h3>Instance Configuration</h3>
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/instance-configuration.png" alt="Pantalla Instance Configuration para elegir instancia predeterminada o con nombre">
+    <figcaption>Instance Configuration: elección entre instancia predeterminada o instancia con nombre.</figcaption>
+  </figure>
+
+  <div class="summary-grid">
+    <div class="summary-card positive">
+      <div class="summary-label">Default Instance</div>
+      <p>Usa el nombre interno <code>MSSQLSERVER</code>. La conexión queda como <code>SERVIDOR</code>. Recomendada si habrá una sola instalación.</p>
+    </div>
+    <div class="summary-card neutral">
+      <div class="summary-label">Named Instance</div>
+      <p>Permite asignar un nombre, por ejemplo <code>SQL2019</code>. La conexión queda como <code>SERVIDOR\SQL2019</code>.</p>
+    </div>
+  </div>
+
+  <h3>Server Configuration</h3>
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/server-configuration.png" alt="Pantalla Server Configuration con servicios de SQL Server y tipo de inicio">
+    <figcaption>Server Configuration: configuración de servicios y tipo de inicio.</figcaption>
+  </figure>
+
+  <ul class="step-list">
+    <li><div class="step-num">1</div><div><strong>SQL Server Database Engine</strong>: servicio principal del motor. Debe quedar con <code>Startup Type = Automatic</code>.</div></li>
+    <li><div class="step-num">2</div><div><strong>SQL Server Agent</strong>: sirve para backups automáticos, tareas programadas y jobs. SQL Server Express no lo incluye.</div></li>
+    <li><div class="step-num">3</div><div><strong>Accounts</strong>: para comenzar se puede dejar la configuración predeterminada.</div></li>
+  </ul>
+
+  <hr>
+  <h3>Database Engine Configuration</h3>
+  <figure class="lesson-figure">
+    <img src="../images/sql_server_2019_instalacion/database-engine-configuration.png" alt="Pantalla Database Engine Configuration con modo de autenticación y administradores">
+    <figcaption>Database Engine Configuration: modo de autenticación, usuario sa y administradores SQL Server.</figcaption>
+  </figure>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Opción</th>
+        <th>Qué significa</th>
+        <th>Recomendación</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Windows Authentication</td>
+        <td>Solo permite usuarios de Windows.</td>
+        <td>Es más segura.</td>
+      </tr>
+      <tr>
+        <td>Mixed Mode</td>
+        <td>Permite usuarios de Windows y usuarios propios de SQL Server.</td>
+        <td>Muy recomendado para prácticas.</td>
+      </tr>
+      <tr>
+        <td>Usuario sa</td>
+        <td>Administrador principal de SQL Server cuando se usa Mixed Mode.</td>
+        <td>Usar contraseña fuerte.</td>
+      </tr>
+      <tr>
+        <td>Add Current User</td>
+        <td>Agrega el usuario actual de Windows como administrador SQL Server.</td>
+        <td>Siempre hacer clic.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip warn">
+    <div class="tip-icon">!</div>
+    <div>TempDB es una base temporal usada para ordenar datos, joins, operaciones internas y consultas temporales. Para aprender se puede dejar automático; en servidores se planifica con más detalle.</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card positive">
+      <div class="summary-label">Installation Progress</div>
+      <p>Muestra el avance de instalación del motor, servicios, librerías y herramientas internas. Puede tardar entre 5 y 40 minutos según el equipo.</p>
+    </div>
+    <div class="summary-card positive">
+      <div class="summary-label">Complete</div>
+      <p>Si aparece <strong>SUCCESS</strong>, SQL Server quedó instalado correctamente.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Instalación de SQL Server 2019 · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/instalador_sql_server_2019.js"></script>
+</body>
+</html>
