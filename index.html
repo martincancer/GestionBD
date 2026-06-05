@@ -37,7 +37,7 @@
       <div class="meta-sep"></div>
       <div class="meta-item">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
-        <span><strong>7</strong> clases disponibles + <strong>1</strong> evaluación resuelta + <strong>1</strong> repaso + videos + descargas</span>
+        <span><strong>8</strong> clases disponibles + <strong>1</strong> evaluación resuelta + <strong>1</strong> repaso + videos + descargas</span>
       </div>
       <div class="meta-sep"></div>
       <div class="meta-item">
@@ -434,6 +434,43 @@
       </div>
     </a>
 
+    <!-- PROCEDIMIENTOS CON PARÁMETROS DE SALIDA -->
+    <a class="lesson-card azure" href="pages/procedimientos_salida_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">OUT</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 08</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Procedimientos almacenados con parámetros de salida</div>
+        <div class="card-desc">Cómo crear y ejecutar procedimientos que reciben datos de entrada y devuelven un valor calculado o consultado mediante parámetros OUTPUT.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>Definición y diferencia entre entrada y salida</li>
+          <li><span class="topic-dot"></span>Estructura básica con CREATE PROCEDURE y OUTPUT</li>
+          <li><span class="topic-dot"></span>Ejemplo SP_Promedio con SELECT del resultado</li>
+          <li><span class="topic-dot"></span>Ejemplo SP_GetCotizacion sobre MonedasCotizaciones</li>
+          <li><span class="topic-dot"></span>Resumen, capturas de resultado y quiz final</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">📖 Intro</span>
+            <span class="tab-badge">📐 Estructura</span>
+            <span class="tab-badge">🛠️ Ejemplos</span>
+            <span class="tab-badge">📋 Resumen</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
 
 
     <!-- PRÓXIMAMENTE -->
@@ -470,6 +507,7 @@
           <li><span class="topic-dot"></span>Clase grabada de Triggers</li>
           <li><span class="topic-dot"></span>Clase grabada de Auditor&iacute;as</li>
           <li><span class="topic-dot"></span>Clase grabada de Cursores</li>
+          <li><span class="topic-dot"></span>Clase grabada de Procedimientos con OUTPUT</li>
           <li><span class="topic-dot"></span>Reproducci&oacute;n embebida sin salir del sitio</li>
         </ul>
         <div class="card-footer">
@@ -611,6 +649,18 @@
         <span class="kw">AFTER INSERT</span><br>
         <span class="kw">AS</span><br>
         <span class="kw">SELECT</span> * <span class="kw">FROM</span> inserted
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">Parámetro OUTPUT</div>
+      <div class="ref-card-content">
+        <span class="kw">CREATE PROCEDURE</span> sp_nombre<br>
+        &nbsp;&nbsp;@entrada <span class="kw">INT</span>,<br>
+        &nbsp;&nbsp;@salida <span class="kw">INT</span> <span class="kw">OUTPUT</span><br>
+        <span class="kw">AS SET</span> @salida = @entrada * <span class="nm">2</span>;<br>
+        <span class="kw">DECLARE</span> @out <span class="kw">INT</span>;<br>
+        <span class="kw">EXEC</span> sp_nombre @entrada=<span class="nm">5</span>, @salida=@out <span class="kw">OUTPUT</span>;
       </div>
     </div>
 

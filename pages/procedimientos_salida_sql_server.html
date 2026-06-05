@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procedimientos almacenados con parámetros de salida — SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/procedimientos_salida_sql_server.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 08 · SQL Server</div>
+  <h1>Procedimientos almacenados<br><span>con parámetros de salida</span></h1>
+  <p class="subtitle">Cómo crear procedimientos que reciben datos de entrada y devuelven un valor calculado o consultado mediante parámetros OUTPUT, sin depender de un conjunto de resultados.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:17%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('estructura',1)">📐 Estructura</button>
+  <button class="nav-btn" onclick="showTab('promedio',2)">🔢 Ejemplo básico</button>
+  <button class="nav-btn" onclick="showTab('empresa',3)">🏢 Ejemplo Empresa</button>
+  <button class="nav-btn" onclick="showTab('resumen',4)">📋 Resumen</button>
+  <button class="nav-btn" onclick="showTab('quiz',5)">🧠 Quiz</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>¿Qué es un procedimiento con parámetros de salida?</h2>
+  <p class="section-intro">Un procedimiento almacenado con parámetros de salida en SQL Server es un conjunto de instrucciones SQL precompiladas que puede aceptar parámetros de entrada y <strong>devolver valores</strong> a través de parámetros de salida.</p>
+
+  <div class="concepto">
+    Como todo procedimiento almacenado, puede recibir parámetros de entrada. La diferencia es que además se declara un <strong>parámetro de salida</strong> agregando la palabra clave <code>OUTPUT</code> al final. Luego, dentro de la lógica del procedimiento, se asigna el valor que se desea retornar con <code>SET</code> o <code>SELECT @variable = ...</code>.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('estructura',1)">
+      <div class="card-icon">OUT</div>
+      <h3>Parámetro OUTPUT</h3>
+      <p>Se declara junto al tipo de dato y permite que el procedimiento devuelva un valor al código que lo invoca.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--purple)" onclick="showTab('promedio',2)">
+      <div class="card-icon">AVG</div>
+      <h3>Ejemplo numérico</h3>
+      <p>SP_Promedio calcula el promedio de dos números y lo devuelve por un parámetro de salida.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--blue)" onclick="showTab('empresa',3)">
+      <div class="card-icon">DB</div>
+      <h3>Ejemplo con tablas</h3>
+      <p>SP_GetCotizacion consulta MonedasCotizaciones y retorna la cotización de una moneda en una fecha.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('resumen',4)">
+      <div class="card-icon">EXEC</div>
+      <h3>Cómo ejecutarlo</h3>
+      <p>Declarás una variable, ejecutás el procedimiento y mostrás el resultado con SELECT o PRINT.</p>
+    </div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">Parámetro de entrada</div>
+      <div class="compare-body">
+        <ul>
+          <li>Envía un valor <strong>hacia</strong> el procedimiento.</li>
+          <li>Se declara como <code>@nombre TipoDato</code>.</li>
+          <li>Se usa dentro de la lógica del procedimiento.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card good">
+      <div class="compare-header">Parámetro de salida</div>
+      <div class="compare-body">
+        <ul>
+          <li>Devuelve un valor <strong>desde</strong> el procedimiento.</li>
+          <li>Se declara como <code>@nombre TipoDato OUTPUT</code>.</li>
+          <li>Se asigna dentro del procedimiento y se recupera al ejecutar.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="tab-estructura">
+  <h2>Estructura básica</h2>
+  <p class="section-intro">Todo procedimiento con parámetros de salida sigue el mismo esquema: declaración del procedimiento, parámetros de entrada, parámetro OUTPUT y lógica interna que asigna el valor de retorno.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">estructura_basica.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">CREATE PROCEDURE</span> <span class="id">NombreProcedimiento</span>
+    <span class="id">@ParametroEntrada</span> <span class="type">TipoDato</span>,
+    <span class="id">@ParametroSalida</span> <span class="type">TipoDato</span> <span class="kw">OUTPUT</span>
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+    <span class="comment">-- Lógica del procedimiento</span>
+    <span class="kw">SET</span> <span class="id">@ParametroSalida</span> = <span class="id">Valor</span>
+<span class="kw">END</span></pre>
+  </div>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Parte</th>
+        <th>Qué hace</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>CREATE PROCEDURE</td>
+        <td>Comando para crear el procedimiento en la base de datos.</td>
+      </tr>
+      <tr>
+        <td>@ParametroEntrada</td>
+        <td>Recibe el dato que necesita el procedimiento para trabajar.</td>
+      </tr>
+      <tr>
+        <td>OUTPUT</td>
+        <td>Indica que ese parámetro devolverá un valor al finalizar la ejecución.</td>
+      </tr>
+      <tr>
+        <td>SET / SELECT @var =</td>
+        <td>Asigna el valor que el procedimiento va a retornar.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="parts-grid">
+    <div class="part-card">
+      <strong>CREATE PROCEDURE</strong>
+      <p>Comando para crear el procedimiento.</p>
+    </div>
+    <div class="part-card">
+      <strong>Nombre del procedimiento</strong>
+      <p>Identificador con el que luego lo vas a ejecutar.</p>
+    </div>
+    <div class="part-card">
+      <strong>Parámetros de entrada</strong>
+      <p>Datos que recibe desde afuera.</p>
+    </div>
+    <div class="part-card">
+      <strong>Parámetro OUTPUT</strong>
+      <p>Variable de retorno declarada con la palabra OUTPUT.</p>
+    </div>
+    <div class="part-card">
+      <strong>Lógica del procedimiento</strong>
+      <p>Cálculos, consultas y asignación del valor de salida.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="tab-promedio">
+  <h2>Ejemplo: SP_Promedio</h2>
+  <p class="section-intro">Este primer ejemplo calcula el promedio de dos números y lo devuelve mediante un parámetro de salida. Es útil para entender el mecanismo sin depender todavía de tablas.</p>
+
+  <div class="demo-block">
+    <h3>Creación del procedimiento</h3>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">sp_promedio.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">CREATE PROCEDURE</span> <span class="id">SP_Promedio</span>
+(
+ <span class="id">@n1</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>),
+ <span class="id">@n2</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>),
+ <span class="id">@resultado</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">OUTPUT</span>
+)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+ <span class="kw">SET</span> <span class="id">@resultado</span> = (<span class="id">@n1</span> + <span class="id">@n2</span>) / <span class="num">2</span>;
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>Ejecución</h3>
+    <p class="section-intro">Primero declarás una variable para almacenar el dato retornado. Luego ejecutás el procedimiento con <code>EXEC</code> o <code>EXECUTE</code>, pasando los parámetros de entrada y la variable como parámetro de salida. Para ver el resultado usás <code>SELECT</code> o <code>PRINT</code>.</p>
+
+    <div class="flow-strip">
+      <div class="flow-step">DECLARE @salida</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">EXEC + OUTPUT</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">SELECT / PRINT</div>
+    </div>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejecutar_sp_promedio.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">DECLARE</span> <span class="id">@salida</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>)
+
+<span class="kw">EXECUTE</span> <span class="id">SP_Promedio</span> <span class="id">@n1</span> = <span class="num">5</span>,
+                    <span class="id">@n2</span> = <span class="num">6</span>,
+                    <span class="id">@resultado</span> = <span class="id">@salida</span> <span class="kw">OUTPUT</span>
+
+<span class="kw">SELECT</span> <span class="id">@salida</span>;</pre>
+    </div>
+
+    <figure class="lesson-figure compact">
+      <img src="../images/procedimientos_salida/page-1-image-1.png" alt="Resultado de SELECT @salida mostrando 5.50">
+      <figcaption>Resultado esperado: el promedio de 5 y 6 es <strong>5.50</strong>.</figcaption>
+    </figure>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>Al ejecutar el procedimiento, la palabra <code>OUTPUT</code> también se escribe al pasar la variable receptora: <code>@resultado = @salida OUTPUT</code>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-empresa">
+  <h2>Ejemplo con base de datos Empresa</h2>
+  <p class="section-intro">Ahora el procedimiento consulta una tabla real. Obtiene desde <code>MonedasCotizaciones</code> la cotización de una moneda en una fecha específica, recibiendo el id de moneda y la fecha como entrada y devolviendo la cotización como salida.</p>
+
+  <div class="demo-block">
+    <h3>Creación: SP_GetCotizacion</h3>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">sp_get_cotizacion.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">CREATE PROCEDURE</span> <span class="id">SP_GetCotizacion</span>
+(
+ <span class="id">@idmoneda</span> <span class="type">int</span>,
+ <span class="id">@fecha</span> <span class="type">datetime</span>,
+ <span class="id">@cotizacion</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">OUTPUT</span>
+)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+ <span class="kw">SELECT</span> <span class="id">@cotizacion</span> = <span class="id">cotizacion</span>
+ <span class="kw">FROM</span> <span class="tbl">MonedasCotizaciones</span>
+ <span class="kw">WHERE</span> <span class="id">fecha</span> = <span class="id">@fecha</span> <span class="kw">AND</span> <span class="id">idMoneda</span> = <span class="id">@idmoneda</span>
+<span class="kw">END</span></pre>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <h3>Ejecución</h3>
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span class="code-title">ejecutar_sp_get_cotizacion.sql</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><span class="kw">DECLARE</span> <span class="id">@cot_output</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>)
+
+<span class="kw">EXEC</span> <span class="id">SP_GetCotizacion</span> <span class="id">@idmoneda</span> = <span class="num">2</span>,
+                      <span class="id">@fecha</span> = <span class="str">'20200102'</span>,
+                      <span class="id">@cotizacion</span> = <span class="id">@cot_output</span> <span class="kw">OUTPUT</span>
+
+<span class="kw">PRINT</span> <span class="id">@cot_output</span></pre>
+    </div>
+
+    <figure class="lesson-figure compact">
+      <img src="../images/procedimientos_salida/page-2-image-1.png" alt="Pestaña Messages mostrando 59.85 como resultado de PRINT @cot_output">
+      <figcaption>Resultado en la pestaña Messages al usar <code>PRINT @cot_output</code>: en este caso, <strong>59.85</strong>.</figcaption>
+    </figure>
+  </div>
+
+  <div class="tip warning">
+    <div class="tip-icon">!</div>
+    <div>Recordá separar cada parámetro con coma al ejecutar el procedimiento. Si no hay fila que cumpla la condición, el parámetro de salida puede quedar en <code>NULL</code>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-resumen">
+  <h2>Resumen de la clase</h2>
+  <p class="section-intro">Repaso rápido de la estructura, la creación y la ejecución de un procedimiento almacenado con parámetros de salida.</p>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">Al crear</div>
+      <ul>
+        <li>Usá <code>CREATE PROCEDURE</code> con nombre y parámetros.</li>
+        <li>Declará los parámetros de entrada con su tipo de dato.</li>
+        <li>Agregá <code>OUTPUT</code> al parámetro que devolverá el valor.</li>
+        <li>Asigná el resultado con <code>SET</code> o <code>SELECT @var = columna</code>.</li>
+      </ul>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Al ejecutar</div>
+      <ul>
+        <li>Declará una variable para almacenar el valor de retorno.</li>
+        <li>Ejecutá con <code>EXEC</code> o <code>EXECUTE</code>.</li>
+        <li>Pasá los parámetros de entrada y la variable con <code>OUTPUT</code>.</li>
+        <li>Mostrá el resultado con <code>SELECT @variable</code> o <code>PRINT @variable</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">resumen_completo.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="comment">-- Creación</span>
+<span class="kw">CREATE PROCEDURE</span> <span class="id">SP_GetCotizacion</span>
+(
+ <span class="id">@idmoneda</span> <span class="type">int</span>,
+ <span class="id">@fecha</span> <span class="type">datetime</span>,
+ <span class="id">@cotizacion</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">OUTPUT</span>
+)
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+ <span class="kw">SELECT</span> <span class="id">@cotizacion</span> = <span class="id">cotizacion</span>
+ <span class="kw">FROM</span> <span class="tbl">MonedasCotizaciones</span>
+ <span class="kw">WHERE</span> <span class="id">fecha</span> = <span class="id">@fecha</span> <span class="kw">AND</span> <span class="id">idMoneda</span> = <span class="id">@idmoneda</span>
+<span class="kw">END</span>
+
+<span class="comment">-- Ejecución</span>
+<span class="kw">DECLARE</span> <span class="id">@cot_output</span> <span class="type">numeric</span>(<span class="num">10</span>,<span class="num">2</span>)
+
+<span class="kw">EXEC</span> <span class="id">SP_GetCotizacion</span> <span class="id">@idmoneda</span> = <span class="num">2</span>,
+                      <span class="id">@fecha</span> = <span class="str">'20200102'</span>,
+                      <span class="id">@cotizacion</span> = <span class="id">@cot_output</span> <span class="kw">OUTPUT</span>
+
+<span class="kw">SELECT</span> <span class="id">@cot_output</span></pre>
+  </div>
+
+  <div class="tip success">
+    <div class="tip-icon">✓</div>
+    <div>También podés ver la clase grabada en la sección <a class="inline-link" href="clases_grabadas.html">Videos de clases grabadas</a>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-quiz">
+  <h2>Quiz sobre parámetros de salida</h2>
+  <p class="section-intro">Un repaso corto para verificar que entendiste la diferencia entre parámetros de entrada y salida, y cómo ejecutar un procedimiento que devuelve un valor.</p>
+
+  <div id="quiz-container"></div>
+
+  <div class="quiz-score" id="quiz-score" style="display:none;">
+    <div class="score-num" id="score-val">0/0</div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Reintentar quiz</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Procedimientos almacenados con parámetros de salida · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/procedimientos_salida_sql_server.js"></script>
+</body>
+</html>
