@@ -1,0 +1,185 @@
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .wrap { padding: 1rem 0; font-size: 14px; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { padding: 7px 12px; border: 0.5px solid var(--color-border-tertiary); font-size: 13px; text-align: left; }
+  th { background: var(--color-background-secondary); font-weight: 500; color: var(--color-text-secondary); font-size: 12px; }
+  .hl-row { background: var(--color-background-info); }
+  .hl-row td { color: var(--color-text-info); font-weight: 500; }
+  .hl-cell { background: var(--color-background-success); color: var(--color-text-success); font-weight: 500; }
+  .null-cell { color: var(--color-text-tertiary); font-style: italic; }
+  .step-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .step-btn { padding: 6px 14px; font-size: 13px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+  .step-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; font-weight: 500; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .code-block { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; margin: 0 0 14px; border: 0.5px solid var(--color-border-tertiary); }
+  .hl-code { color: var(--color-text-info); font-weight: 500; }
+  .hl-orange { color: #E8784A; font-weight: 500; }
+  .hl-green { color: var(--color-text-success); font-weight: 500; }
+  .arrow-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 10px 0; }
+  .arrow-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 6px 14px; font-size: 13px; font-weight: 500; }
+  .big-arrow { font-size: 22px; color: var(--color-text-tertiary); }
+  .note { background: var(--color-background-secondary); border-left: 3px solid var(--color-border-info); padding: 8px 12px; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; font-size: 13px; color: var(--color-text-secondary); margin: 10px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <h2 class="sr-only">Explicación interactiva de la consulta PIVOT en SQL Server</h2>
+
+  <div class="step-bar">
+    <button class="step-btn active" onclick="go(0)">1 — Los datos crudos</button>
+    <button class="step-btn" onclick="go(1)">2 — La subconsulta T</button>
+    <button class="step-btn" onclick="go(2)">3 — El PIVOT en acción</button>
+    <button class="step-btn" onclick="go(3)">4 — Resultado final</button>
+  </div>
+
+  <!-- PANEL 0 -->
+  <div class="panel active" id="p0">
+    <p class="section-title">Tabla Ventas (simplificada)</p>
+    <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 10px">Así se ven los datos originales: una fila por cada venta, con su fecha y total.</p>
+    <table>
+      <tr><th>VentaID</th><th>ClienteID</th><th>Fecha</th><th>Total</th></tr>
+      <tr><td>1</td><td>1</td><td>2018-03-10</td><td>$1.500</td></tr>
+      <tr><td>2</td><td>1</td><td>2019-07-22</td><td>$2.200</td></tr>
+      <tr><td>3</td><td>1</td><td>2020-01-05</td><td>$3.100</td></tr>
+      <tr class="hl-row"><td>4</td><td>2</td><td>2020-08-14</td><td>$900</td></tr>
+      <tr class="hl-row"><td>5</td><td>2</td><td>2021-11-30</td><td>$4.500</td></tr>
+      <tr><td>6</td><td>1</td><td>2022-06-01</td><td>$1.800</td></tr>
+      <tr class="hl-row"><td>7</td><td>2</td><td>2023-02-18</td><td>$2.700</td></tr>
+      <tr><td>8</td><td>1</td><td>2023-09-09</td><td>$5.000</td></tr>
+    </table>
+    <div class="note" style="margin-top:12px">Si el cliente 1 tiene 5 ventas en distintos años → tiene 5 filas. Con PIVOT vamos a convertirlas en <strong>1 sola fila</strong> con una columna por año.</div>
+  </div>
+
+  <!-- PANEL 1 -->
+  <div class="panel" id="p1">
+    <p class="section-title">La subconsulta interna — preparamos los ingredientes</p>
+    <div class="code-block">
+<span style="color:var(--color-text-tertiary)">-- Esto es el "T" (tabla temporal)</span>
+SELECT <span class="hl-code">c.razonSocial</span>,
+       <span class="hl-orange">YEAR(fecha)</span> AS año,
+       <span class="hl-green">v.total</span> AS total
+FROM Ventas v
+INNER JOIN Clientes c ON c.ClienteID = v.ClienteID
+    </div>
+    <div class="grid2">
+      <div>
+        <p class="section-title">Resultado del T</p>
+        <table>
+          <tr><th style="background:var(--color-background-info);color:var(--color-text-info)">razonSocial</th><th style="background:#fff3e0;color:#E8784A">año</th><th style="background:var(--color-background-success);color:var(--color-text-success)">total</th></tr>
+          <tr><td>Ferretería Sol</td><td>2018</td><td>$1.500</td></tr>
+          <tr><td>Ferretería Sol</td><td>2019</td><td>$2.200</td></tr>
+          <tr><td>Ferretería Sol</td><td>2020</td><td>$3.100</td></tr>
+          <tr class="hl-row"><td>Librería del Sur</td><td>2020</td><td>$900</td></tr>
+          <tr class="hl-row"><td>Librería del Sur</td><td>2021</td><td>$4.500</td></tr>
+          <tr><td>Ferretería Sol</td><td>2022</td><td>$1.800</td></tr>
+          <tr class="hl-row"><td>Librería del Sur</td><td>2023</td><td>$2.700</td></tr>
+          <tr><td>Ferretería Sol</td><td>2023</td><td>$5.000</td></tr>
+        </table>
+      </div>
+      <div>
+        <p class="section-title">¿Por qué solo 3 columnas?</p>
+        <div class="note">El PIVOT <strong>necesita exactamente 3 cosas</strong>:<br><br>
+          <span class="hl-code">razonSocial</span> → la columna que va a <em>agrupar</em> las filas (queda como fila)<br><br>
+          <span class="hl-orange">año</span> → la columna cuyos <em>valores</em> se van a convertir en columnas<br><br>
+          <span class="hl-green">total</span> → el valor que se va a <em>agregar</em> (sumar, promediar, etc.)
+        </div>
+        <div class="note" style="border-color:var(--color-border-warning)">Si seleccionás más columnas en el T, el PIVOT las trata como parte del agrupamiento → filas repetidas. ¡Cuidado!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2 -->
+  <div class="panel" id="p2">
+    <p class="section-title">El PIVOT — girando filas en columnas</p>
+    <div class="code-block">
+PIVOT (
+  <span class="hl-green">SUM(total)</span>
+  FOR <span class="hl-orange">año</span>
+  IN (<span class="hl-code">[2018], [2019], [2020], [2021], [2022], [2023]</span>)
+) AS pvt
+    </div>
+
+    <div class="arrow-row">
+      <div>
+        <p class="section-title" style="text-align:center">Antes (filas)</p>
+        <table style="width:auto">
+          <tr><th>razonSocial</th><th>año</th><th>total</th></tr>
+          <tr><td>Ferretería Sol</td><td>2018</td><td>$1.500</td></tr>
+          <tr><td>Ferretería Sol</td><td>2022</td><td>$1.800</td></tr>
+          <tr><td>Ferretería Sol</td><td>2023</td><td>$5.000</td></tr>
+        </table>
+      </div>
+      <div class="big-arrow">→</div>
+      <div>
+        <p class="section-title" style="text-align:center">Después (columnas)</p>
+        <table style="width:auto">
+          <tr><th>razonSocial</th><th>[2018]</th><th>[2022]</th><th>[2023]</th></tr>
+          <tr><td>Ferretería Sol</td><td class="hl-cell">$1.500</td><td class="hl-cell">$1.800</td><td class="hl-cell">$5.000</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <strong>¿Por qué los años van entre corchetes [ ]?</strong><br>
+      Porque son números, y SQL Server no acepta números como nombres de columnas sin envolverlos en <code>[ ]</code>. Es como ponerles comillas para decirle al motor "esto es un nombre de columna, no un número".
+    </div>
+    <div class="note" style="border-color:var(--color-border-warning);margin-top:10px">
+      <strong>¿Qué pasa con los años que no tienen datos?</strong><br>
+      Si Librería del Sur no vendió en 2018 → ese año queda en <code>NULL</code>. Se puede reemplazar con <code>ISNULL([2018], 0)</code> si preferís mostrar 0.
+    </div>
+  </div>
+
+  <!-- PANEL 3 -->
+  <div class="panel" id="p3">
+    <p class="section-title">Resultado final del SELECT *</p>
+    <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 10px">Una fila por cliente. Cada año es una columna. Si no hubo ventas ese año → NULL.</p>
+    <table>
+      <tr><th>razonSocial</th><th>[2018]</th><th>[2019]</th><th>[2020]</th><th>[2021]</th><th>[2022]</th><th>[2023]</th></tr>
+      <tr>
+        <td><strong>Ferretería Sol</strong></td>
+        <td class="hl-cell">$1.500</td>
+        <td class="hl-cell">$2.200</td>
+        <td class="hl-cell">$3.100</td>
+        <td class="null-cell">NULL</td>
+        <td class="hl-cell">$1.800</td>
+        <td class="hl-cell">$5.000</td>
+      </tr>
+      <tr>
+        <td><strong>Librería del Sur</strong></td>
+        <td class="null-cell">NULL</td>
+        <td class="null-cell">NULL</td>
+        <td class="hl-cell">$900</td>
+        <td class="hl-cell">$4.500</td>
+        <td class="null-cell">NULL</td>
+        <td class="hl-cell">$2.700</td>
+      </tr>
+    </table>
+
+    <div style="margin-top:18px">
+      <p class="section-title">Resumen de las 3 partes de un PIVOT</p>
+      <table>
+        <tr><th>Parte</th><th>Código</th><th>¿Qué hace?</th></tr>
+        <tr><td><strong>Subconsulta T</strong></td><td style="font-family:var(--font-mono);font-size:12px">SELECT razonSocial, YEAR(fecha), total</td><td>Prepara exactamente 3 columnas para el PIVOT</td></tr>
+        <tr><td><strong>Función de agregación</strong></td><td style="font-family:var(--font-mono);font-size:12px">SUM(total)</td><td>Qué hacer con los valores (puede ser SUM, AVG, COUNT, MAX...)</td></tr>
+        <tr><td><strong>FOR ... IN</strong></td><td style="font-family:var(--font-mono);font-size:12px">FOR año IN ([2018],...)</td><td>Qué columna "girar" y qué valores se vuelven columnas</td></tr>
+      </table>
+    </div>
+
+    <div class="note" style="margin-top:12px;border-color:var(--color-border-tertiary)">
+      <strong>Limitación importante:</strong> los años tienen que estar escritos a mano en el IN (lista estática). Si mañana aparece 2024, la consulta no lo muestra automáticamente. Para hacerlo dinámico hay que usar SQL dinámico con <code>EXEC</code> o <code>sp_executesql</code>.
+    </div>
+  </div>
+</div>
+
+<script>
+function go(n) {
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
+  document.querySelectorAll('.step-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+}
+</script>

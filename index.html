@@ -37,7 +37,7 @@
       <div class="meta-sep"></div>
       <div class="meta-item">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
-        <span><strong>8</strong> clases disponibles + <strong>1</strong> evaluación resuelta + <strong>1</strong> repaso + videos + descargas</span>
+        <span><strong>9</strong> clases disponibles + <strong>1</strong> evaluación resuelta + <strong>1</strong> repaso + videos + descargas</span>
       </div>
       <div class="meta-sep"></div>
       <div class="meta-item">
@@ -473,6 +473,44 @@
     </a>
 
 
+    <!-- CONSULTAS PIVOT -->
+    <a class="lesson-card gold" href="pages/pivot_sql_server.html">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-icon">PVT</div>
+          <div class="card-header-meta">
+            <span class="card-num">CLASE 09</span>
+            <span class="status-pill status-live">Disponible</span>
+          </div>
+        </div>
+        <div class="card-title">Consultas PIVOT en SQL Server</div>
+        <div class="card-desc">Transformá filas en columnas para reportes por período o categoría usando PIVOT estático, subconsulta interna y agregación sobre ventas por cliente y año.</div>
+        <ul class="topics">
+          <li><span class="topic-dot"></span>Qué es PIVOT y cuándo conviene usarlo</li>
+          <li><span class="topic-dot"></span>Subconsulta T con exactamente 3 columnas</li>
+          <li><span class="topic-dot"></span>Explicación interactiva paso a paso</li>
+          <li><span class="topic-dot"></span>Consulta completa con SUM y lista de años</li>
+          <li><span class="topic-dot"></span>Limitaciones del PIVOT estático y quiz final</li>
+        </ul>
+        <div class="card-footer">
+          <div class="tab-badges">
+            <span class="tab-badge">📖 Intro</span>
+            <span class="tab-badge">🔄 Interactivo</span>
+            <span class="tab-badge">📐 Consulta</span>
+            <span class="tab-badge">📋 Resumen</span>
+            <span class="tab-badge">🧠 Quiz</span>
+          </div>
+          <button class="open-btn">
+            Abrir
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </a>
+
     <!-- PRÓXIMAMENTE -->
     <div class="soon-card">
       <div>
@@ -508,6 +546,7 @@
           <li><span class="topic-dot"></span>Clase grabada de Auditor&iacute;as</li>
           <li><span class="topic-dot"></span>Clase grabada de Cursores</li>
           <li><span class="topic-dot"></span>Clase grabada de Procedimientos con OUTPUT</li>
+          <li><span class="topic-dot"></span>Clase grabada de Consultas PIVOT</li>
           <li><span class="topic-dot"></span>Reproducci&oacute;n embebida sin salir del sitio</li>
         </ul>
         <div class="card-footer">
@@ -649,6 +688,19 @@
         <span class="kw">AFTER INSERT</span><br>
         <span class="kw">AS</span><br>
         <span class="kw">SELECT</span> * <span class="kw">FROM</span> inserted
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-card-label">PIVOT estático</div>
+      <div class="ref-card-content">
+        <span class="kw">SELECT</span> * <span class="kw">FROM</span> (<br>
+        &nbsp;&nbsp;<span class="kw">SELECT</span> col, año, total<br>
+        &nbsp;&nbsp;<span class="kw">FROM</span> Tabla<br>
+        ) <span class="kw">AS</span> T<br>
+        <span class="kw">PIVOT</span> (<span class="fn">SUM</span>(total)<br>
+        &nbsp;&nbsp;<span class="kw">FOR</span> año <span class="kw">IN</span> ([<span class="nm">2018</span>], [<span class="nm">2019</span>])<br>
+        ) <span class="kw">AS</span> pvt
       </div>
     </div>
 

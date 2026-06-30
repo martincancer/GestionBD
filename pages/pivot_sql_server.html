@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consultas PIVOT en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/pivot_sql_server.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a>
+  </div>
+  <div class="badge">Clase 09 · SQL Server</div>
+  <h1>Consultas PIVOT<br><span>en SQL Server</span></h1>
+  <p class="subtitle">Convertí filas en columnas para armar reportes por período, cliente o categoría usando PIVOT estático con subconsulta interna, agregación y lista de valores.</p>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showTab('intro',0)">📖 Introducción</button>
+  <button class="nav-btn" onclick="showTab('interactivo',1)">🔄 Explicación interactiva</button>
+  <button class="nav-btn" onclick="showTab('consulta',2)">📐 Consulta completa</button>
+  <button class="nav-btn" onclick="showTab('resumen',3)">📋 Resumen</button>
+  <button class="nav-btn" onclick="showTab('quiz',4)">🧠 Quiz</button>
+</nav>
+
+<div class="section active" id="tab-intro">
+  <h2>¿Qué es una consulta PIVOT?</h2>
+  <p class="section-intro">PIVOT es un operador de T-SQL que <strong>transforma filas en columnas</strong>. Es útil cuando tenés datos en formato largo (una fila por evento) y querés verlos en formato ancho (una columna por categoría o período).</p>
+
+  <div class="concepto">
+    Pensalo como una tabla dinámica en Excel: partís de ventas con una fila por fecha y terminás con <strong>una fila por cliente</strong> y <strong>una columna por año</strong>, mostrando el total vendido en cada cruce.
+  </div>
+
+  <div class="intro-grid">
+    <div class="intro-card" style="--card-color:var(--accent)" onclick="showTab('interactivo',1)">
+      <div class="card-icon">T</div>
+      <h3>Subconsulta T</h3>
+      <p>Prepará exactamente tres columnas: agrupación, valor a pivotear y dato a agregar.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--keyword)" onclick="showTab('interactivo',1)">
+      <div class="card-icon">FOR</div>
+      <h3>FOR ... IN</h3>
+      <p>Indicá qué columna girar y qué valores concretos se convierten en encabezados.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--green)" onclick="showTab('consulta',2)">
+      <div class="card-icon">SUM</div>
+      <h3>Agregación</h3>
+      <p>Definí qué hacer con los valores: SUM, AVG, COUNT, MAX u otra función de agregación.</p>
+    </div>
+    <div class="intro-card" style="--card-color:var(--blue)" onclick="showTab('resumen',3)">
+      <div class="card-icon">[ ]</div>
+      <h3>Lista estática</h3>
+      <p>Los años o categorías del IN se escriben a mano; un valor nuevo no aparece solo.</p>
+    </div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card good">
+      <div class="compare-header">Antes del PIVOT</div>
+      <div class="compare-body">
+        <ul>
+          <li>Una fila por cada venta del cliente.</li>
+          <li>Columnas: cliente, año, total.</li>
+          <li>Difícil de leer cuando hay muchos períodos.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-card good">
+      <div class="compare-header">Después del PIVOT</div>
+      <div class="compare-body">
+        <ul>
+          <li>Una fila por cliente.</li>
+          <li>Una columna por cada año del IN.</li>
+          <li>Ideal para reportes comparativos por período.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip info">
+    <div class="tip-icon">i</div>
+    <div>En esta clase trabajamos con <strong>PIVOT estático</strong>: la lista de columnas resultantes está fija en el código. Para columnas dinámicas hace falta SQL dinámico.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-interactivo">
+  <h2>Explicación paso a paso</h2>
+  <p class="section-intro">Recorré los cuatro pasos para ver cómo pasan los datos crudos a la subconsulta T, cómo actúa el PIVOT y cómo queda el resultado final.</p>
+
+  <div class="pivot-interactive">
+    <h2 class="sr-only">Explicación interactiva de la consulta PIVOT en SQL Server</h2>
+
+    <div class="step-bar">
+      <button type="button" class="step-btn active" onclick="pivotGo(0)">1 — Los datos crudos</button>
+      <button type="button" class="step-btn" onclick="pivotGo(1)">2 — La subconsulta T</button>
+      <button type="button" class="step-btn" onclick="pivotGo(2)">3 — El PIVOT en acción</button>
+      <button type="button" class="step-btn" onclick="pivotGo(3)">4 — Resultado final</button>
+    </div>
+
+    <div class="panel active" id="p0">
+      <p class="section-title">Tabla Ventas (simplificada)</p>
+      <p class="section-text">Así se ven los datos originales: una fila por cada venta, con su fecha y total.</p>
+      <table>
+        <tr><th>VentaID</th><th>ClienteID</th><th>Fecha</th><th>Total</th></tr>
+        <tr><td>1</td><td>1</td><td>2018-03-10</td><td>$1.500</td></tr>
+        <tr><td>2</td><td>1</td><td>2019-07-22</td><td>$2.200</td></tr>
+        <tr><td>3</td><td>1</td><td>2020-01-05</td><td>$3.100</td></tr>
+        <tr class="hl-row"><td>4</td><td>2</td><td>2020-08-14</td><td>$900</td></tr>
+        <tr class="hl-row"><td>5</td><td>2</td><td>2021-11-30</td><td>$4.500</td></tr>
+        <tr><td>6</td><td>1</td><td>2022-06-01</td><td>$1.800</td></tr>
+        <tr class="hl-row"><td>7</td><td>2</td><td>2023-02-18</td><td>$2.700</td></tr>
+        <tr><td>8</td><td>1</td><td>2023-09-09</td><td>$5.000</td></tr>
+      </table>
+      <div class="note" style="margin-top:12px">Si el cliente 1 tiene 5 ventas en distintos años → tiene 5 filas. Con PIVOT vamos a convertirlas en <strong>1 sola fila</strong> con una columna por año.</div>
+    </div>
+
+    <div class="panel" id="p1">
+      <p class="section-title">La subconsulta interna — preparamos los ingredientes</p>
+      <div class="code-block">
+<span style="color:var(--color-text-tertiary)">-- Esto es el "T" (tabla temporal)</span>
+SELECT <span class="hl-code">c.razonSocial</span>,
+       <span class="hl-orange">YEAR(fecha)</span> AS año,
+       <span class="hl-green">v.total</span> AS total
+FROM Ventas v
+INNER JOIN Clientes c ON c.ClienteID = v.ClienteID
+      </div>
+      <div class="grid2">
+        <div>
+          <p class="section-title">Resultado del T</p>
+          <table>
+            <tr><th class="th-info">razonSocial</th><th class="th-orange">año</th><th class="th-green">total</th></tr>
+            <tr><td>Ferretería Sol</td><td>2018</td><td>$1.500</td></tr>
+            <tr><td>Ferretería Sol</td><td>2019</td><td>$2.200</td></tr>
+            <tr><td>Ferretería Sol</td><td>2020</td><td>$3.100</td></tr>
+            <tr class="hl-row"><td>Librería del Sur</td><td>2020</td><td>$900</td></tr>
+            <tr class="hl-row"><td>Librería del Sur</td><td>2021</td><td>$4.500</td></tr>
+            <tr><td>Ferretería Sol</td><td>2022</td><td>$1.800</td></tr>
+            <tr class="hl-row"><td>Librería del Sur</td><td>2023</td><td>$2.700</td></tr>
+            <tr><td>Ferretería Sol</td><td>2023</td><td>$5.000</td></tr>
+          </table>
+        </div>
+        <div>
+          <p class="section-title">¿Por qué solo 3 columnas?</p>
+          <div class="note">El PIVOT <strong>necesita exactamente 3 cosas</strong>:<br><br>
+            <span class="hl-code">razonSocial</span> → la columna que va a <em>agrupar</em> las filas (queda como fila)<br><br>
+            <span class="hl-orange">año</span> → la columna cuyos <em>valores</em> se van a convertir en columnas<br><br>
+            <span class="hl-green">total</span> → el valor que se va a <em>agregar</em> (sumar, promediar, etc.)
+          </div>
+          <div class="note warning">Si seleccionás más columnas en el T, el PIVOT las trata como parte del agrupamiento → filas repetidas. ¡Cuidado!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p2">
+      <p class="section-title">El PIVOT — girando filas en columnas</p>
+      <div class="code-block">
+PIVOT (
+  <span class="hl-green">SUM(total)</span>
+  FOR <span class="hl-orange">año</span>
+  IN (<span class="hl-code">[2018], [2019], [2020], [2021], [2022], [2023]</span>)
+) AS pvt
+      </div>
+
+      <div class="arrow-row">
+        <div>
+          <p class="section-title" style="text-align:center">Antes (filas)</p>
+          <table style="width:auto">
+            <tr><th>razonSocial</th><th>año</th><th>total</th></tr>
+            <tr><td>Ferretería Sol</td><td>2018</td><td>$1.500</td></tr>
+            <tr><td>Ferretería Sol</td><td>2022</td><td>$1.800</td></tr>
+            <tr><td>Ferretería Sol</td><td>2023</td><td>$5.000</td></tr>
+          </table>
+        </div>
+        <div class="big-arrow">→</div>
+        <div>
+          <p class="section-title" style="text-align:center">Después (columnas)</p>
+          <table style="width:auto">
+            <tr><th>razonSocial</th><th>[2018]</th><th>[2022]</th><th>[2023]</th></tr>
+            <tr><td>Ferretería Sol</td><td class="hl-cell">$1.500</td><td class="hl-cell">$1.800</td><td class="hl-cell">$5.000</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:16px">
+        <strong>¿Por qué los años van entre corchetes [ ]?</strong><br>
+        Porque son números, y SQL Server no acepta números como nombres de columnas sin envolverlos en <code>[ ]</code>. Es como ponerles comillas para decirle al motor "esto es un nombre de columna, no un número".
+      </div>
+      <div class="note warning" style="margin-top:10px">
+        <strong>¿Qué pasa con los años que no tienen datos?</strong><br>
+        Si Librería del Sur no vendió en 2018 → ese año queda en <code>NULL</code>. Se puede reemplazar con <code>ISNULL([2018], 0)</code> si preferís mostrar 0.
+      </div>
+    </div>
+
+    <div class="panel" id="p3">
+      <p class="section-title">Resultado final del SELECT *</p>
+      <p class="section-text">Una fila por cliente. Cada año es una columna. Si no hubo ventas ese año → NULL.</p>
+      <table>
+        <tr><th>razonSocial</th><th>[2018]</th><th>[2019]</th><th>[2020]</th><th>[2021]</th><th>[2022]</th><th>[2023]</th></tr>
+        <tr>
+          <td><strong>Ferretería Sol</strong></td>
+          <td class="hl-cell">$1.500</td>
+          <td class="hl-cell">$2.200</td>
+          <td class="hl-cell">$3.100</td>
+          <td class="null-cell">NULL</td>
+          <td class="hl-cell">$1.800</td>
+          <td class="hl-cell">$5.000</td>
+        </tr>
+        <tr>
+          <td><strong>Librería del Sur</strong></td>
+          <td class="null-cell">NULL</td>
+          <td class="null-cell">NULL</td>
+          <td class="hl-cell">$900</td>
+          <td class="hl-cell">$4.500</td>
+          <td class="null-cell">NULL</td>
+          <td class="hl-cell">$2.700</td>
+        </tr>
+      </table>
+
+      <div style="margin-top:18px">
+        <p class="section-title">Resumen de las 3 partes de un PIVOT</p>
+        <table>
+          <tr><th>Parte</th><th>Código</th><th>¿Qué hace?</th></tr>
+          <tr><td><strong>Subconsulta T</strong></td><td style="font-family:var(--font-mono);font-size:12px">SELECT razonSocial, YEAR(fecha), total</td><td>Prepara exactamente 3 columnas para el PIVOT</td></tr>
+          <tr><td><strong>Función de agregación</strong></td><td style="font-family:var(--font-mono);font-size:12px">SUM(total)</td><td>Qué hacer con los valores (puede ser SUM, AVG, COUNT, MAX...)</td></tr>
+          <tr><td><strong>FOR ... IN</strong></td><td style="font-family:var(--font-mono);font-size:12px">FOR año IN ([2018],...)</td><td>Qué columna "girar" y qué valores se vuelven columnas</td></tr>
+        </table>
+      </div>
+
+      <div class="note" style="margin-top:12px;border-color:var(--color-border-tertiary)">
+        <strong>Limitación importante:</strong> los años tienen que estar escritos a mano en el IN (lista estática). Si mañana aparece 2024, la consulta no lo muestra automáticamente. Para hacerlo dinámico hay que usar SQL dinámico con <code>EXEC</code> o <code>sp_executesql</code>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="tab-consulta">
+  <h2>Consulta completa</h2>
+  <p class="section-intro">Esta es la sentencia completa vista en clase: subconsulta T con JOIN a Clientes, PIVOT con SUM y lista estática de años.</p>
+
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-title">ventas_pivot_por_anio.sql</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="kw">SELECT</span> *
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> <span class="id">c.razonSocial</span>,
+           <span class="fn">YEAR</span>(<span class="id">v.fecha</span>) <span class="kw">AS</span> año,
+           <span class="id">v.total</span> <span class="kw">AS</span> total
+    <span class="kw">FROM</span> <span class="tbl">Ventas</span> <span class="id">v</span>
+    <span class="kw">INNER JOIN</span> <span class="tbl">Clientes</span> <span class="id">c</span> <span class="kw">ON</span> <span class="id">c.ClienteID</span> = <span class="id">v.ClienteID</span>
+) <span class="kw">AS</span> T
+<span class="kw">PIVOT</span> (
+    <span class="fn">SUM</span>(total)
+    <span class="kw">FOR</span> año <span class="kw">IN</span> (
+        [<span class="num">2018</span>], [<span class="num">2019</span>], [<span class="num">2020</span>],
+        [<span class="num">2021</span>], [<span class="num">2022</span>], [<span class="num">2023</span>]
+    )
+) <span class="kw">AS</span> pvt</pre>
+  </div>
+
+  <table class="op-table">
+    <thead>
+      <tr>
+        <th>Parte</th>
+        <th>Qué hace</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>FROM ( ... ) AS T</td>
+        <td>Subconsulta que devuelve las tres columnas necesarias para el PIVOT.</td>
+      </tr>
+      <tr>
+        <td>PIVOT ( SUM(total) ... )</td>
+        <td>Agrega los totales cuando hay más de una venta en el mismo cruce cliente-año.</td>
+      </tr>
+      <tr>
+        <td>FOR año IN ([2018], ...)</td>
+        <td>Convierte cada año listado en una columna del resultado.</td>
+      </tr>
+      <tr>
+        <td>AS pvt</td>
+        <td>Alias obligatorio del resultado del operador PIVOT.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip warning">
+    <div class="tip-icon">!</div>
+    <div>Si necesitás mostrar <code>0</code> en lugar de <code>NULL</code>, envolvé el SELECT exterior con <code>ISNULL([2018], 0)</code> (y así para cada columna de año).</div>
+  </div>
+</div>
+
+<div class="section" id="tab-resumen">
+  <h2>Resumen de la clase</h2>
+  <p class="section-intro">Repaso rápido de la estructura del PIVOT estático y los puntos clave para no confundir filas con columnas.</p>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label">Las 3 columnas del T</div>
+      <ul>
+        <li>Columna de agrupación → queda como fila (ej. razonSocial).</li>
+        <li>Columna a pivotear → sus valores pasan a ser columnas (ej. año).</li>
+        <li>Columna a agregar → el dato numérico a sumar o promediar (ej. total).</li>
+      </ul>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Errores frecuentes</div>
+      <ul>
+        <li>Seleccionar más de 3 columnas en T → filas duplicadas.</li>
+        <li>Olvidar corchetes en años o categorías numéricas.</li>
+        <li>Esperar que aparezcan años nuevos sin actualizar el IN.</li>
+        <li>Confundir NULL con cero cuando no hubo ventas.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="parts-grid">
+    <div class="part-card">
+      <strong>Subconsulta T</strong>
+      <p>Prepara el dataset en formato largo con exactamente tres columnas.</p>
+    </div>
+    <div class="part-card">
+      <strong>PIVOT ( agregación )</strong>
+      <p>Define qué función aplicar sobre los valores del cruce.</p>
+    </div>
+    <div class="part-card">
+      <strong>FOR columna IN (...)</strong>
+      <p>Lista estática de valores que se convierten en columnas.</p>
+    </div>
+    <div class="part-card">
+      <strong>PIVOT dinámico</strong>
+      <p>Tema aparte: requiere armar el SQL como cadena y ejecutarlo con EXEC.</p>
+    </div>
+  </div>
+
+  <div class="tip success">
+    <div class="tip-icon">✓</div>
+    <div>También podés ver la clase grabada en la sección <a class="inline-link" href="clases_grabadas.html">Videos de clases grabadas</a>.</div>
+  </div>
+</div>
+
+<div class="section" id="tab-quiz">
+  <h2>Quiz sobre consultas PIVOT</h2>
+  <p class="section-intro">Un repaso corto para verificar que entendiste la subconsulta T, el operador PIVOT y las limitaciones del enfoque estático.</p>
+
+  <div id="quiz-container"></div>
+
+  <div class="quiz-score" id="quiz-score" style="display:none;">
+    <div class="score-num" id="score-val">0/0</div>
+    <div class="score-label" id="score-msg"></div>
+    <button class="btn" onclick="resetQuiz()">Reintentar quiz</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="container">
+    Consultas PIVOT en SQL Server · Tecnicatura Superior en Análisis, Desarrollo y Programación de Aplicaciones<br>
+    <span style="color:var(--text3)">Instituto Superior de Formación Docente y Técnica N° 43 · Lobos, Buenos Aires</span>
+  </div>
+</footer>
+
+<a class="classroom-fab" href="https://classroom.google.com/c/Nzk2NjQzNTY3MjUz" target="_blank" rel="noopener noreferrer">
+  <span class="classroom-fab-icon">GC</span>
+  Classroom
+</a>
+
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/pivot_sql_server.js"></script>
+</body>
+</html>
