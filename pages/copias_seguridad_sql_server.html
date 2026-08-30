@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copias de seguridad en SQL Server</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/copias_seguridad_sql_server.css">
+<link rel="stylesheet" href="../css/sidebar_nav.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-top"><a class="back-link" href="../index.html"><span>&larr;</span>Volver al índice</a></div>
+    <div class="badge">Clase 10 · SQL Server</div>
+    <h1>Copias de <span>seguridad</span><br>en SQL Server</h1>
+    <p class="subtitle">Protegé una base de datos con backups completos, diferenciales y del log de transacciones, desde SSMS o con T-SQL.</p>
+  </header>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('intro', 0)">📖 Introducción</button>
+    <button class="nav-btn" onclick="showTab('ssms', 1)">🖥️ En SSMS</button>
+    <button class="nav-btn" onclick="showTab('tipos', 2)">🗂️ Tipos de backup</button>
+    <button class="nav-btn" onclick="showTab('script', 3)">⌨️ Con T-SQL</button>
+    <button class="nav-btn" onclick="showTab('quiz', 4)">🧠 Quiz</button>
+  </nav>
+
+  <section class="section active" id="tab-intro">
+    <h2>¿Qué es una copia de seguridad?</h2>
+    <p class="section-intro">Un backup es una copia recuperable de una base de datos. Permite volver a disponer de la información ante corrupción, errores humanos, fallas de disco o pérdida del servidor.</p>
+    <div class="concepto">Una estrategia de respaldo no consiste solamente en hacer un archivo <code>.bak</code>: hay que decidir <strong>qué tipo de backup</strong> usar, cada cuánto hacerlo y cuánto trabajo se está dispuesto a perder ante un incidente.</div>
+    <div class="backup-steps">
+      <div class="backup-step"><div class="backup-step-num">01 · PLANIFICAR</div><h3>Definí el riesgo</h3><p>Elegí el modelo de recuperación según la tolerancia a la pérdida de datos.</p></div>
+      <div class="backup-step"><div class="backup-step-num">02 · RESPALDAR</div><h3>Guardá una copia</h3><p>Usá SSMS o un comando T-SQL y seleccioná un destino seguro.</p></div>
+      <div class="backup-step"><div class="backup-step-num">03 · VERIFICAR</div><h3>Comprobá el resultado</h3><p>Revisá que el archivo se haya creado y que pueda restaurarse cuando haga falta.</p></div>
+    </div>
+    <div class="tip warning"><span class="tip-icon">⚠️</span><div>Conviene guardar las copias en una unidad externa al servidor. Si el backup queda solo en el mismo equipo, una falla de esa máquina puede afectar tanto la base como la copia.</div></div>
+  </section>
+
+  <section class="section" id="tab-ssms">
+    <h2>Crear un backup desde SQL Server Management Studio</h2>
+    <p class="section-intro">En el Explorador de objetos, hacé clic derecho sobre la base que querés proteger y elegí <strong>Tareas → Copia de seguridad</strong>. SSMS abrirá una ventana con las opciones principales.</p>
+    <div class="backup-image-grid">
+      <figure class="backup-figure"><img src="../images/copias_seguridad/01-menu-backup.png" alt="Menú de SQL Server Management Studio con la opción Tareas y Copia de seguridad."><figcaption><strong>1. Abrir el asistente.</strong> Elegí la base y accedé a Tareas → Copia de seguridad.</figcaption></figure>
+      <figure class="backup-figure"><img src="../images/copias_seguridad/02-configuracion-general.png" alt="Pestaña General del asistente de copia de seguridad de SQL Server."><figcaption><strong>2. Configuración general.</strong> Revisá la base, el modelo de recuperación, el tipo y el destino.</figcaption></figure>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-card good"><div class="compare-header">Destino</div><div class="compare-body"><ul><li>Podés conservar la ruta propuesta o elegir otra ubicación.</li><li>Con más de un destino, el backup se divide en partes.</li><li>Para restaurar, necesitás todas las partes generadas.</li></ul></div></div>
+      <div class="compare-card good"><div class="compare-header">Confiabilidad</div><div class="compare-body"><ul><li>Las opciones de medios permiten anexar o sobrescribir.</li><li>También se puede solicitar una comprobación de la copia.</li><li>Revisá cada ajuste antes de confirmar con Aceptar.</li></ul></div></div>
+    </div>
+    <div class="backup-image-grid">
+      <figure class="backup-figure"><img src="../images/copias_seguridad/03-opciones-medios.png" alt="Pestaña Opciones de medios del asistente de backup."><figcaption><strong>Opciones de medios.</strong> Indicá si se anexa a un conjunto existente o se sobrescribe.</figcaption></figure>
+      <figure class="backup-figure"><img src="../images/copias_seguridad/04-opciones-backup.png" alt="Pestaña Opciones de copia de seguridad del asistente de backup."><figcaption><strong>Opciones de backup.</strong> Configurá vencimiento, compresión y, si corresponde, cifrado.</figcaption></figure>
+    </div>
+    <div class="tip warning"><span class="tip-icon">ℹ️</span><div>Un backup creado en una versión de SQL Server no se puede restaurar en una versión anterior.</div></div>
+  </section>
+
+  <section class="section" id="tab-tipos">
+    <h2>Modelos de recuperación y tipos de backup</h2>
+    <p class="section-intro">El modelo de recuperación define cómo se administra el log de transacciones y condiciona las opciones de recuperación disponibles.</p>
+    <div class="compare-grid">
+      <div class="compare-card good"><div class="compare-header">Modelo SIMPLE</div><div class="compare-body"><ul><li>No permite backups del log de transacciones.</li><li>Recupera automáticamente espacio del log.</li><li>Solo permite restaurar hasta el final del último backup.</li><li>Los cambios posteriores al último backup pueden perderse.</li></ul></div></div>
+      <div class="compare-card good"><div class="compare-header">Modelo COMPLETO</div><div class="compare-body"><ul><li>Requiere backups periódicos del log.</li><li>Permite recuperar hasta un momento específico.</li><li>Reduce al mínimo la pérdida de trabajo.</li><li>Demanda administrar la cadena de respaldos.</li></ul></div></div>
+    </div>
+    <div class="intro-grid">
+      <div class="intro-card"><div class="card-icon">FULL</div><h3>Completo</h3><p>Copia toda la base. Es el punto de partida de cualquier estrategia y suele ser el backup más grande.</p></div>
+      <div class="intro-card"><div class="card-icon">DIFF</div><h3>Diferencial</h3><p>Guarda los cambios desde el último backup completo. Para restaurar se necesita primero ese completo.</p></div>
+      <div class="intro-card"><div class="card-icon">LOG</div><h3>Log de transacciones</h3><p>Guarda las transacciones posteriores al último backup del log o completo. Requiere modelo COMPLETO.</p></div>
+    </div>
+    <h3>Ejemplo de estrategia</h3>
+    <div class="strategy"><div class="strategy-time">Domingo</div><div class="strategy-copy"><strong>Backup completo</strong> para establecer una base de recuperación.</div><div class="strategy-time">Cada día</div><div class="strategy-copy"><strong>Backup diferencial</strong> para concentrar los cambios del día desde el último completo.</div><div class="strategy-time">Cada hora</div><div class="strategy-copy"><strong>Backup del log</strong> para poder recuperar cambios con mayor precisión.</div></div>
+  </section>
+
+  <section class="section" id="tab-script">
+    <h2>Crear un backup con T-SQL</h2>
+    <p class="section-intro">La misma operación se puede automatizar en un script. El siguiente ejemplo genera un backup completo de la base <code>Empresa2023</code>.</p>
+    <div class="code-wrapper"><div class="code-header"><span class="code-title">backup_completo.sql</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div><pre><span class="kw">BACKUP DATABASE</span> <span class="tbl">[Empresa2023]</span>
+<span class="kw">TO DISK</span> <span class="op">=</span> <span class="st">N'C:\BackupSQL\Empresa2023.bak'</span>
+<span class="kw">WITH</span>
+    <span class="kw">INIT</span>,
+    <span class="kw">STATS</span> <span class="op">=</span> <span class="nm">10</span>
+<span class="kw">GO</span></pre></div>
+    <div class="compare-grid">
+      <div class="compare-card good"><div class="compare-header">Partes del comando</div><div class="compare-body"><ul><li><code>BACKUP DATABASE</code>: selecciona la base a respaldar.</li><li><code>TO DISK</code>: indica dónde se crea el archivo <code>.bak</code>.</li><li>La <code>N</code> identifica una cadena Unicode.</li></ul></div></div>
+      <div class="compare-card good"><div class="compare-header">Opciones WITH</div><div class="compare-body"><ul><li><code>INIT</code>: sobrescribe el archivo si ya existe.</li><li>Sin <code>INIT</code>, la copia se agrega al archivo existente.</li><li><code>STATS = 10</code>: informa el avance en saltos del 10%.</li></ul></div></div>
+    </div>
+    <div class="tip info"><span class="tip-icon">💡</span><div>La ruta del backup debe existir y la cuenta que ejecuta el servicio de SQL Server necesita permisos de escritura sobre esa ubicación.</div></div>
+  </section>
+
+  <section class="section" id="tab-quiz">
+    <h2>Quiz de autoevaluación</h2>
+    <p class="section-intro">Comprobá si identificás qué backup usar y cómo funciona la recuperación.</p>
+    <div id="quiz-container"></div>
+    <div class="quiz-score" id="quiz-score" style="display:none"><div class="score-label">Resultado</div><div class="score-value" id="score-val"></div><div class="score-msg" id="score-msg"></div><button class="btn" onclick="resetQuiz()">Reintentar quiz</button></div>
+  </section>
+</div>
+<script src="../js/sidebar_nav.js"></script>
+<script src="../js/copias_seguridad_sql_server.js"></script>
+</body>
+</html>
